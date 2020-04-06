@@ -72,7 +72,9 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void sendEvent(Event event) {
-        this.client.sendEvent(event);
+        if (this.client != null) {
+            this.client.sendEvent(event);
+        }
     }
 
     private void checkBuffer() throws Exception {

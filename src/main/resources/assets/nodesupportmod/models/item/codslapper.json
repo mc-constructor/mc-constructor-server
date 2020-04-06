@@ -1,0 +1,18 @@
+{
+	"parent": "item/handheld",
+	"textures": {
+		"layer0": "nodesupportmod:items/codslapper"
+	},
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [ 0, -90, 220 ],
+			"translation": [ 0, 7, 3],
+			"scale":[ 1.5, 1.5, 1.5]
+		},
+		"firstperson_righthand": {
+			"rotation": [ 0, -90, 220 ],
+			"translation": [ 0, 7, 3],
+			"scale":[ 0.8, 0.8, 0.8]
+		}
+	}
+}
