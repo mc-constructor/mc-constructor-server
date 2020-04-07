@@ -3,6 +3,7 @@ package net.dandoes.nodesupportmod;
 import net.dandoes.nodesupportmod.codslap.CodslapItems;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -13,6 +14,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -34,7 +36,6 @@ public class NodeSupportMod
 
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
-    private NodeInteropServer interopServer;
 
     public NodeSupportMod() {
         // Register the setup method for modloading
@@ -75,62 +76,72 @@ public class NodeSupportMod
 //                collect(Collectors.toList()));
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) throws Exception {
-        this.interopServer = new NodeInteropServer(8888, event.getServer());
-        this.interopServer.run();
-    }
 
-    @SubscribeEvent
-    public void onBroadcastEvent(final PlayerEvent.PlayerLoggedInEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final PlayerEvent.PlayerLoggedOutEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final PlayerEvent.PlayerRespawnEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final PlayerEvent.ItemPickupEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final AttackEntityEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final PlayerInteractEvent.LeftClickBlock event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final PlayerInteractEvent.LeftClickEmpty event) {
-        // may need a client mod to send this event, it is only fired on the client side
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final EntityItemPickupEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final LivingDeathEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final LivingAttackEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final LivingDamageEvent event) {
-        this.interopServer.broadcast(event);
-    }
-    @SubscribeEvent
-    public void onBroadcastEvent(final LivingFallEvent event) {
-        this.interopServer.broadcast(event);
-    }
+    @Mod.EventBusSubscriber(value= Dist.DEDICATED_SERVER)
+    public static class BroadcastedEventsRegistry {
+        private static NodeInteropServer interopServer;
 
+        private static void broadcast(Event event) {
+            interopServer.broadcast(event);
+        }
+
+        @SubscribeEvent
+        public static void onServerStarting(FMLServerStartingEvent event) throws Exception {
+            interopServer = new NodeInteropServer(8888, event.getServer());
+            interopServer.run();
+        }
+
+        @SubscribeEvent
+        public static void onBroadcastEvent(final PlayerEvent.PlayerLoggedInEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final PlayerEvent.PlayerLoggedOutEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final PlayerEvent.PlayerRespawnEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final PlayerEvent.ItemPickupEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final AttackEntityEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final PlayerInteractEvent.LeftClickBlock event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final PlayerInteractEvent.LeftClickEmpty event) {
+            // may need a client mod to send this event, it is only fired on the client side
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final EntityItemPickupEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final LivingDeathEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final LivingAttackEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final LivingDamageEvent event) {
+            broadcast(event);
+        }
+        @SubscribeEvent
+        public static void onBroadcastEvent(final LivingFallEvent event) {
+            broadcast(event);
+        }
+
+    }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
     // Event bus for receiving Registry Events)
