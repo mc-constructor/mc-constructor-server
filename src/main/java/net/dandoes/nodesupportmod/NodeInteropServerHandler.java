@@ -1,24 +1,27 @@
 package net.dandoes.nodesupportmod;
 
-import com.mojang.brigadier.CommandDispatcher;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
-import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+@ChannelHandler.Sharable
 public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(NodeInteropServerHandler.class);
 
     private final SocketChannel channel;
     private final MinecraftServer server;
@@ -26,12 +29,13 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
     private boolean isReady = false;
     private final char newline = "\n".charAt(0);
     private final Lock bufferLock = new ReentrantLock();
-    private String delimiter;
     private NodeClient client;
+    private String delimiter;
 
     public NodeInteropServerHandler(SocketChannel channel, MinecraftServer server) {
         this.channel = channel;
         this.server = server;
+        LOGGER.debug("new NodeInteropServerHandler");
     }
 
     @Override
@@ -45,7 +49,7 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
                     this.delimiter = this.buffer.toString();
                     this.isReady = true;
                     this.buffer.delete(0, this.buffer.length());
-                    LOGGER.info("got delimiter: " + this.delimiter);
+                    LOGGER.debug("got delimiter: " + this.delimiter);
                     try {
                         ChannelWriter writer = new ChannelWriter(this.channel, this.delimiter);
                         this.client = new NodeClient(writer);
@@ -57,6 +61,7 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
                 }
                 this.buffer.append(c);
             }
+            LOGGER.debug("done reading channel: " + this.buffer.toString());
         } finally {
             this.bufferLock.unlock();
             ReferenceCountUtil.release(msg);
@@ -78,49 +83,51 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void checkBuffer() throws Exception {
-        System.out.println("Checking buffer: " + this.buffer.toString());
         int endMessageIndex = this.buffer.indexOf(this.delimiter);
         if (endMessageIndex < 0) {
             return;
         }
-        String message = this.getNextFromBuffer();
-        if (message != null) {
-            this.handleIncomingMessage(message);
+        List<String> messages = this.getNextFromBuffer();
+        for (String message : messages) {
+            this.handleMessage(message);
         }
     }
 
-    private String getNextFromBuffer() {
-        String message;
+    private List<String> getNextFromBuffer() {
+        List<String> messages = new ArrayList<>();
+        // multiple messages can come in a single "chunk" / reading session. it's expensive to get the lock, so get all
+        // messages in the buffer at once
         try {
             this.bufferLock.lock();
             int endMessageIndex = this.buffer.indexOf(this.delimiter);
-            if (endMessageIndex < 0) {
-                return null;
+            while (endMessageIndex >= 0) {
+                messages.add(this.buffer.substring(0, endMessageIndex));
+                this.buffer.delete(0, endMessageIndex + this.delimiter.length());
+                endMessageIndex = this.buffer.indexOf(this.delimiter);
             }
-            message = this.buffer.substring(0, endMessageIndex);
-            this.buffer.delete(0, endMessageIndex + this.delimiter.length());
-            return message;
+            return messages;
         }
         finally {
             this.bufferLock.unlock();
         }
     }
 
-    private void handleIncomingMessage(String message) throws Exception {
+    private void handleMessage(String message) throws Exception {
         String[] parts = message.split("\n");
         if (parts.length > 3) {
             throw new Exception("Unexpected message length");
         }
+        LOGGER.debug("handleIncomingMessage: " + message);
         String requestId = parts[0];
         String type = parts[1];
         String cmd = parts[2];
         if (type.equals("cmd")) {
-            CommandDispatcher<CommandSource> dispatcher = this.server.getCommandManager().getDispatcher();
-            NodeCommandSource source = new NodeCommandSource(this.server, requestId, this.client);
-            try {
-                dispatcher.execute(cmd, source);
-            } catch (Exception ex) {
-                this.client.sendResponse(source, ex);
+            NodeCommandSource source = new NodeCommandSource(server, requestId, client);
+            if (server instanceof DedicatedServer) {
+                DedicatedServer dServer = (DedicatedServer) server;
+                dServer.handleConsoleInput(cmd, source);
+            } else {
+                throw new Exception("wha huh?");
             }
         }
     }

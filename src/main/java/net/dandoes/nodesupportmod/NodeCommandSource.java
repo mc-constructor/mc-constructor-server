@@ -1,5 +1,7 @@
 package net.dandoes.nodesupportmod;
 
+import com.mojang.brigadier.exceptions.CommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
@@ -8,10 +10,13 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NodeCommandSource extends CommandSource {
+    private static final Logger LOGGER = LogManager.getLogger(NodeCommandSource.class);
 
-    public final String requestId;
+    private final String requestId;
     private final NodeClient client;
 
     public NodeCommandSource(MinecraftServer server, String requestId, NodeClient client) {
@@ -20,9 +25,20 @@ public class NodeCommandSource extends CommandSource {
         this.client = client;
     }
 
+    public String getRequestId() {
+        return requestId;
+    }
+
     @Override
     public void sendFeedback(ITextComponent message, boolean allowLogging) {
-        super.sendFeedback(message, allowLogging);
+        LOGGER.info("sending feedback for requestId " + this.requestId);
         this.client.sendResponse(this, message);
+    }
+
+    @Override
+    public void sendErrorMessage(ITextComponent message) {
+        LOGGER.info("sending error message for requestId " + this.requestId);
+        final SimpleCommandExceptionType exceptionType = new SimpleCommandExceptionType(message);
+        this.client.sendResponse(this, exceptionType.create());
     }
 }

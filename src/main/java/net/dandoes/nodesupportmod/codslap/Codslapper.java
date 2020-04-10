@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.UUID;
 
 public class Codslapper extends SwordItem {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Codslapper.class);
     protected static final UUID ATTACK_KNOCKBACK_MODIFIER = UUID.fromString("AAF54B27-F135-4D56-908F-2D23111E649B");
 
     public Codslapper(final String itemId, CodslapperItemTier tier) {
@@ -47,7 +47,7 @@ public class Codslapper extends SwordItem {
 
     @Override
     public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        LOGGER.info("hitEntity: " + attacker.getName().toString() + " attacking " + target.getName().toString());
+        LOGGER.debug("hitEntity: " + attacker.getName().toString() + " attacking " + target.getName().toString());
         return super.hitEntity(stack, target, attacker);
     }
 
@@ -59,7 +59,7 @@ public class Codslapper extends SwordItem {
             AttributeModifier value = new AttributeModifier(
                     ATTACK_KNOCKBACK_MODIFIER,
                     SharedMonsterAttributes.ATTACK_KNOCKBACK.getName(),
-                    this.getTier().getKnockbackMultiplier(),
+                    this.getTier().getKnockbackMultiplier() * 10,
                     AttributeModifier.Operation.MULTIPLY_BASE
             );
             modifiers.put(SharedMonsterAttributes.ATTACK_KNOCKBACK.getName(), value);

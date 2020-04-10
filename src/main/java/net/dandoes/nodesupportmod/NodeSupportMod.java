@@ -1,15 +1,18 @@
 package net.dandoes.nodesupportmod;
 
+import com.google.common.collect.Multimap;
 import net.dandoes.nodesupportmod.codslap.CodslapItems;
-import net.minecraft.block.Blocks;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -27,6 +30,8 @@ import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collection;
+
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(NodeSupportMod.MODID)
 public class NodeSupportMod
@@ -34,8 +39,7 @@ public class NodeSupportMod
     public static final String MODID = "nodesupportmod";
     public static final String NAME = "NodeJS Support Mod";
 
-    // Directly reference a log4j logger.
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(NodeSupportMod.class);
 
     public NodeSupportMod() {
         // Register the setup method for modloading
@@ -53,11 +57,12 @@ public class NodeSupportMod
 
     private void setup(final FMLCommonSetupEvent event) {
         // some preinit code
-        LOGGER.info("HELLO FROM PREINIT");
-        LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+//        LOGGER.info("HELLO FROM PREINIT");
+//        LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
+
         // do something that can only be done on the client
 //        LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }
@@ -76,9 +81,67 @@ public class NodeSupportMod
 //                collect(Collectors.toList()));
     }
     // You can use SubscribeEvent and let the Event Bus discover methods to call
+//    @Mod.EventBusSubscriber(value= Dist.CLIENT)
+//    public static class ClientBroadcastedEventsRegistry {
+//        @SubscribeEvent
+//        public static void onBroadcastEvent(final PlayerInteractEvent.LeftClickEmpty event) {
+//            // may need a client mod to send this event, it is only fired on the client side
+//            broadcast(event);
+//        }
+//
+//        @SubscribeEvent
+//        public static void onConnectToServer(final NetworkEvent event) {
+//            net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
+//        }
+//    }
 
-    @Mod.EventBusSubscriber(value= Dist.DEDICATED_SERVER)
-    public static class BroadcastedEventsRegistry {
+    @Mod.EventBusSubscriber()
+    public static class ModHandledEventsRegistry {
+        @SubscribeEvent
+        public static void onKnockbackEvent(final LivingKnockBackEvent event) {
+            if (!(event.getAttacker() instanceof ServerPlayerEntity)) {
+                return;
+            }
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getAttacker();
+            if (player.swingingHand != Hand.MAIN_HAND) {
+                return;
+            }
+            ItemStack weaponStack = player.getHeldItem(Hand.MAIN_HAND);
+            Multimap<String, AttributeModifier> modifiers = weaponStack.getAttributeModifiers(EquipmentSlotType.MAINHAND);
+            Collection<AttributeModifier> knockbackModifiers = modifiers.get(SharedMonsterAttributes.ATTACK_KNOCKBACK.getName());
+            if (knockbackModifiers != null) {
+                LOGGER.debug("Base knockback: " + event.getStrength());
+                float base = getBaseKnockback(knockbackModifiers, event.getStrength());
+                event.setStrength(getKnockback(knockbackModifiers, base));
+                LOGGER.debug("Result knockback: " + event.getStrength());
+            }
+        }
+
+        private static float getBaseKnockback(Collection<AttributeModifier> modifiers, float base) {
+            for (AttributeModifier modifier : modifiers) {
+                if (modifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE) {
+                    base *= modifier.getAmount();
+                }
+            }
+            return base;
+        }
+
+        private static float getKnockback(Collection<AttributeModifier> modifiers, float base) {
+            float result = base;
+            for (AttributeModifier modifier : modifiers) {
+                if (modifier.getOperation() == AttributeModifier.Operation.ADDITION) {
+                    result += modifier.getAmount();
+                }
+                if (modifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL) {
+                    result += modifier.getAmount();
+                }
+            }
+            return result;
+        }
+    }
+
+    @Mod.EventBusSubscriber(value=Dist.DEDICATED_SERVER)
+    public static class ServerBroadcastedEventsRegistry {
         private static NodeInteropServer interopServer;
 
         private static void broadcast(Event event) {
@@ -87,6 +150,7 @@ public class NodeSupportMod
 
         @SubscribeEvent
         public static void onServerStarting(FMLServerStartingEvent event) throws Exception {
+            LOGGER.debug("Starting NodeInteropServer");
             interopServer = new NodeInteropServer(8888, event.getServer());
             interopServer.run();
         }
@@ -150,7 +214,7 @@ public class NodeSupportMod
         @SubscribeEvent
         public static void onItemsRegistry(final RegistryEvent.Register<Item> itemRegisterEvent) {
             IForgeRegistry<Item> registry = itemRegisterEvent.getRegistry();
-            itemRegisterEvent.getRegistry().registerAll(CodslapItems.getItems());
+            registry.registerAll(CodslapItems.getItems());
         }
     }
 

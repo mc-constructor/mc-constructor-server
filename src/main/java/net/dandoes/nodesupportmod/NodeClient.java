@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class NodeClient {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(NodeClient.class);
 
     private final ChannelWriter writer;
     private final String newline = "\n";
@@ -149,7 +148,7 @@ public class NodeClient {
     }
 
     private List<String> buildCommandResponse(NodeCommandSource source, boolean success) {
-        return new ArrayList<>(Arrays.asList(source.requestId, Boolean.toString(success)));
+        return new ArrayList<>(Arrays.asList(source.getRequestId(), Boolean.toString(success)));
     }
 
     private String getErrorKey(Exception ex) {
