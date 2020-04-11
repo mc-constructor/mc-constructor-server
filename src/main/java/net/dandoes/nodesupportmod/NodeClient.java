@@ -1,6 +1,7 @@
 package net.dandoes.nodesupportmod;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
@@ -8,10 +9,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -53,13 +56,7 @@ public class NodeClient {
         if (event instanceof PlayerEvent) {
             PlayerEvent playerEvent = (PlayerEvent) event;
             PlayerEntity player = playerEvent.getPlayer();
-            response.add(this.getTextContent(player.getDisplayNameAndUUID()));
-
-            // held items
-            ItemStack mainHandStack = player.getItemStackFromSlot(EquipmentSlotType.MAINHAND);
-            ItemStack offHandStack = player.getItemStackFromSlot(EquipmentSlotType.OFFHAND);
-            response.add(this.getTextContent(mainHandStack));
-            response.add(this.getTextContent(offHandStack));
+            response.add(this.getTextContent(player));
 
             if (event instanceof PlayerInteractEvent) {
                 PlayerInteractEvent intEvent = (PlayerInteractEvent) event;
@@ -70,6 +67,16 @@ public class NodeClient {
         } else if (event instanceof EntityEvent) {
             EntityEvent entityEvent = (EntityEvent) event;
             response.add(this.getTextContent(entityEvent.getEntity().getName()));
+
+            if (event instanceof LivingDeathEvent) {
+                LivingDeathEvent deathEvent = (LivingDeathEvent) event;
+                response.add(this.getTextContent(deathEvent.getSource()));
+                Entity revengeTarget = deathEvent.getEntityLiving().getRevengeTarget();
+                if (revengeTarget instanceof PlayerEntity) {
+                    response.add("player");
+                    response.add(this.getTextContent((PlayerEntity)revengeTarget));
+                }
+            }
         }
 
         return String.join(newline, response);
@@ -92,6 +99,19 @@ public class NodeClient {
         }
 
         return String.join(newline, response);
+    }
+
+    private String getTextContent(PlayerEntity player) {
+        List<String> content = new ArrayList<>();
+        content.add(this.getTextContent(player.getDisplayNameAndUUID()));
+
+        // held items
+        ItemStack mainHandStack = player.getItemStackFromSlot(EquipmentSlotType.MAINHAND);
+        ItemStack offHandStack = player.getItemStackFromSlot(EquipmentSlotType.OFFHAND);
+        content.add(this.getTextContent(mainHandStack));
+        content.add(this.getTextContent(offHandStack));
+
+        return String.join(newline, content);
     }
 
     private String getTextContent(ITextComponent text) {
@@ -136,6 +156,23 @@ public class NodeClient {
             }
         }
         return text.toString();
+    }
+
+    private String getTextContent(DamageSource damageSource) {
+        List<String> content = new ArrayList<>();
+
+        content.add(damageSource.getDamageType());
+
+//        if (damageSource instanceof EntityDamageSource) {
+//            EntityDamageSource entityDamageSource = (EntityDamageSource) damageSource;
+//            Entity entitySource = entityDamageSource.getTrueSource();
+//            if (entitySource instanceof ServerPlayerEntity) {
+//                ServerPlayerEntity playerSource = (ServerPlayerEntity) entitySource;
+//                content.add(this.getTextContent(playerSource));
+//            }
+//        }
+
+        return String.join(newline, content);
     }
 
     private String buildCommandResponse(NodeCommandSource source, Exception ex) {
