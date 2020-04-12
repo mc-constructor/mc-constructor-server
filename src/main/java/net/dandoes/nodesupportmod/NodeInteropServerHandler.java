@@ -8,6 +8,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
+import net.dandoes.nodesupportmod.minigame.MinigameManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.eventbus.api.Event;
@@ -121,14 +122,21 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
         String requestId = parts[0];
         String type = parts[1];
         String cmd = parts[2];
+        NodeCommandSource source = new NodeCommandSource(server, requestId, client);
+        this.handleCommand(source, type, cmd);
+    }
+
+    private void handleCommand(NodeCommandSource source, String type, String cmd) throws Exception {
         if (type.equals("cmd")) {
-            NodeCommandSource source = new NodeCommandSource(server, requestId, client);
             if (server instanceof DedicatedServer) {
                 DedicatedServer dServer = (DedicatedServer) server;
                 dServer.handleConsoleInput(cmd, source);
             } else {
                 throw new Exception("wha huh?");
             }
+        }
+        if (type.equals("minigame")) {
+            MinigameManager.handleMessage(source, cmd);
         }
     }
 }

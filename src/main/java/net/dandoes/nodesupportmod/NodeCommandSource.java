@@ -41,4 +41,9 @@ public class NodeCommandSource extends CommandSource {
         final SimpleCommandExceptionType exceptionType = new SimpleCommandExceptionType(message);
         this.client.sendResponse(this, exceptionType.create());
     }
+
+    public void sendErrorMessage(Exception ex) {
+        LOGGER.info("sending error message for requestId " + this.requestId);
+        this.client.sendResponse(this, ex);
+    }
 }

@@ -1,6 +1,7 @@
 package net.dandoes.nodesupportmod;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.dandoes.nodesupportmod.minigame.event.MinigameEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -49,7 +50,6 @@ public class NodeClient {
 
     private String buildEventResponse(Event event) {
         List<String> response = new ArrayList<>();
-        response.clear(); // WTF is there a "foo" entry???
         response.add(UUID.randomUUID().toString());
         response.add(event.getClass().getName());
 
@@ -77,6 +77,10 @@ public class NodeClient {
                     response.add(this.getTextContent((PlayerEntity)revengeTarget));
                 }
             }
+        } else if (event instanceof MinigameEvent) {
+            MinigameEvent minigameEvent = (MinigameEvent) event;
+            response.add(minigameEvent.getAction().getString());
+            response.add(minigameEvent.getGame().getKey());
         }
 
         return String.join(newline, response);

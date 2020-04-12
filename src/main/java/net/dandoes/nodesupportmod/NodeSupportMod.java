@@ -1,13 +1,17 @@
 package net.dandoes.nodesupportmod;
 
 import com.google.common.collect.Multimap;
+import com.mojang.brigadier.CommandDispatcher;
 import net.dandoes.nodesupportmod.codslap.CodslapItems;
+import net.dandoes.nodesupportmod.minigame.MinigameCommand;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Hand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -151,8 +155,12 @@ public class NodeSupportMod
         @SubscribeEvent
         public static void onServerStarting(FMLServerStartingEvent event) throws Exception {
             LOGGER.debug("Starting NodeInteropServer");
-            interopServer = new NodeInteropServer(8888, event.getServer());
+            MinecraftServer server = event.getServer();
+            interopServer = new NodeInteropServer(8888, server);
             interopServer.run();
+
+            CommandDispatcher<CommandSource> dispatcher = server.getCommandManager().getDispatcher();
+            MinigameCommand.register(dispatcher);
         }
 
         @SubscribeEvent
