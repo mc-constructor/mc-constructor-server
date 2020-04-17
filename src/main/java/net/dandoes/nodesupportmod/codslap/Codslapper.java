@@ -36,16 +36,6 @@ public class Codslapper extends SwordItem {
     }
 
     @Override
-    public boolean canPlayerBreakBlockWhileHolding(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
-        return false;
-    }
-
-    @Override
-    public float getDestroySpeed(ItemStack stack, BlockState state) {
-        return 0F;
-    }
-
-    @Override
     public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         LOGGER.debug("hitEntity: " + attacker.getName().toString() + " attacking " + target.getName().toString());
         return super.hitEntity(stack, target, attacker);

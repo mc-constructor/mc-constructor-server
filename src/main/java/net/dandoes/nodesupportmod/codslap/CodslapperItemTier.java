@@ -20,7 +20,7 @@ public enum CodslapperItemTier implements ICodslapperItemTier {
     private final LazyValue<Ingredient> repairMaterial;
     private final double knockbackMultiplier;
 
-    private CodslapperItemTier(double knockbackMultiplier) {
+    CodslapperItemTier(double knockbackMultiplier) {
         this.harvestLevel = 0;
         this.maxUses = Integer.MAX_VALUE;
         this.efficiency = 0;

@@ -1,6 +1,6 @@
 {
 	"parent": "nodesupportmod:item/codslapper",
 	"textures": {
-		"layer0": "nodesupportmod:items/diamond_codslapper"
+		"layer0": "nodesupportmod:items/golden_codslapper"
 	}
 }

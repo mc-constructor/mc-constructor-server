@@ -17,8 +17,8 @@ public class CodslapItems {
     public static final Codslapper STONE_CODSLAPPER = addItem(new Codslapper("stone_codslapper", CodslapperItemTier.STONE_CODSLAPPER));
     @ObjectHolder("iron_codslapper")
     public static final Codslapper IRON_CODSLAPPER = addItem(new Codslapper("iron_codslapper", CodslapperItemTier.IRON_CODSLAPPER));
-    @ObjectHolder("gold_codslapper")
-    public static final Codslapper GOLD_CODSLAPPER = addItem(new Codslapper("gold_codslapper", CodslapperItemTier.GOLD_CODSLAPPER));
+    @ObjectHolder("golden_codslapper")
+    public static final Codslapper GOLD_CODSLAPPER = addItem(new Codslapper("golden_codslapper", CodslapperItemTier.GOLD_CODSLAPPER));
     @ObjectHolder("diamond_codslapper")
     public static final Codslapper DIAMOND_CODSLAPPER = addItem(new Codslapper("diamond_codslapper", CodslapperItemTier.DIAMOND_CODSLAPPER));
     @ObjectHolder("codslapper")
