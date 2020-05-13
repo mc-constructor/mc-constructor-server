@@ -12,6 +12,7 @@ import net.minecraft.command.arguments.ComponentArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.network.play.server.STitlePacket;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 public class MinigameManagerCommand {
 
@@ -70,8 +71,7 @@ public class MinigameManagerCommand {
             description = ComponentArgument.getComponent(context, "description");
         }
         MinigameManager.registerGame(key, title, description);
-
-        // TODO: send success feedback
+        context.getSource().sendFeedback(new StringTextComponent(key), false);
         return 1;
     }
 
@@ -79,7 +79,7 @@ public class MinigameManagerCommand {
         Minigame game = MinigameArgument.getMinigame(context, "minigame");
         MinigameManager.unregisterGame(game);
 
-        // TODO: send success feedback
+        context.getSource().sendFeedback(new StringTextComponent(game.getKey()), false);
         return 1;
     }
 
