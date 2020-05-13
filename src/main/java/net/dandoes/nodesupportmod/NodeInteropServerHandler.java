@@ -26,7 +26,7 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
 
     private final SocketChannel channel;
     private final MinecraftServer server;
-    private StringBuilder buffer = new StringBuilder();
+    private final StringBuilder buffer = new StringBuilder();
     private boolean isReady = false;
     private final char newline = "\n".charAt(0);
     private final Lock bufferLock = new ReentrantLock();

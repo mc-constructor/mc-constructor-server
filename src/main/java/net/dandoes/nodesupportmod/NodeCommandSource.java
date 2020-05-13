@@ -1,6 +1,5 @@
 package net.dandoes.nodesupportmod;
 
-import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
@@ -37,13 +36,13 @@ public class NodeCommandSource extends CommandSource {
 
     @Override
     public void sendErrorMessage(ITextComponent message) {
-        LOGGER.info("sending error message for requestId " + this.requestId);
+        LOGGER.info("sending error message for requestId " + this.requestId + ": " + message.getUnformattedComponentText());
         final SimpleCommandExceptionType exceptionType = new SimpleCommandExceptionType(message);
         this.client.sendResponse(this, exceptionType.create());
     }
 
     public void sendErrorMessage(Exception ex) {
-        LOGGER.info("sending error message for requestId " + this.requestId);
+        LOGGER.info("sending error message for requestId " + this.requestId + ": " + ex.getLocalizedMessage());
         this.client.sendResponse(this, ex);
     }
 }
