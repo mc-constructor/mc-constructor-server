@@ -14,8 +14,8 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = '1.0'
-group = 'net.dandoes.nodesupportmod' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'nodesupportmod'
+group = 'dandoes_minigame_codslap' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'dandoes_minigame_codslap'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
@@ -43,7 +43,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                nodesupportmod {
+                dandoes_minigame_codslap {
                     source sourceSets.main
                 }
             }
@@ -61,7 +61,13 @@ minecraft {
             args 'nogui'
 
             mods {
-                nodesupportmod {
+                dandoes_nodesupport {
+                    source sourceSets.main
+                }
+                dandoes_minigame {
+                    source sourceSets.main
+                }
+                dandoes_minigame_codslap {
                     source sourceSets.main
                 }
             }
@@ -76,10 +82,10 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            args '--mod', 'nodesupportmod', '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'dandoes_minigame_codslap', '--all', '--output', file('src/generated/resources/')
 
             mods {
-                nodesupportmod {
+                dandoes_minigame_codslap {
                     source sourceSets.main
                 }
             }
@@ -117,7 +123,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "nodesupportmod",
+            "Specification-Title": "dandoes_minigame_codslap",
             "Specification-Vendor": "Daniel Schaffer",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,

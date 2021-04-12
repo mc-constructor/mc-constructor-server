@@ -1,0 +1,6 @@
+{
+	"parent": "dandoes_minigame_codslap:item/codslapper",
+	"textures": {
+		"layer0": "dandoes_minigame_codslap:items/iron_codslapper"
+	}
+}
