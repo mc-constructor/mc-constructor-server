@@ -4,16 +4,16 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import net.dandoes.minecraft.minigame.Minigame;
-import net.dandoes.minecraft.nodesupport.NodeInteropEvent;
+import net.dandoes.minecraft.nodesupport.NodeInteropGameClientEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-public class MinigameEvent extends NodeInteropEvent {
+public class MinigameGameClientEvent extends NodeInteropGameClientEvent {
 
     private final Minigame game;
     private final ITextComponent action;
 
-    private MinigameEvent(final Minigame game, final String actionKey) {
+    private MinigameGameClientEvent(final Minigame game, final String actionKey) {
         this.game = game;
         this.action = new TranslationTextComponent("event.minigame.start", game);
     }
@@ -26,8 +26,16 @@ public class MinigameEvent extends NodeInteropEvent {
         return action;
     }
 
-    public static class MinigameStartEvent extends MinigameEvent {
-        public MinigameStartEvent(final Minigame game) {
+    @Override()
+    public Collection<String> getInteropResponseContent() {
+        return Arrays.asList(
+            this.getAction().getString(),
+            this.getGame().getKey()
+        );
+    }
+
+    public static class MinigameStartGameClientEvent extends MinigameGameClientEvent {
+        public MinigameStartGameClientEvent(final Minigame game) {
             super(game, "event.minigame.start");
         }
     }

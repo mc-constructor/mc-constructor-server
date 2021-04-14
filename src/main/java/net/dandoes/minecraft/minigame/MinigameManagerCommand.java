@@ -1,10 +1,12 @@
 package net.dandoes.minecraft.minigame;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.dandoes.minecraft.nodesupport.NodeCommandDispatcher;
+import net.dandoes.minecraft.nodesupport.NodeCommandSource;
+import net.dandoes.minecraft.nodesupport.NodeInteropClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.ComponentArgument;
@@ -34,7 +36,7 @@ public class MinigameManagerCommand {
 //        })))))));
 //    }
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(final NodeCommandDispatcher dispatcher) {
 //        final ScoreboardCommand
         LiteralArgumentBuilder<CommandSource> register = Commands.literal("register")
             .then(Commands.argument("key", StringArgumentType.word())
@@ -50,31 +52,38 @@ public class MinigameManagerCommand {
 
 //                )));
 
-        dispatcher.register(register);
+        dispatcher.asCommandDispatcher().register(register);
 
         LiteralArgumentBuilder<CommandSource> unregister =
             Commands.literal("unregister")
                 .then(Commands.argument("minigame", MinigameArgument.minigames())
                     .suggests(MinigameArgument.SUGGEST_MINIGAMES)
                     .executes(MinigameManagerCommand::unregisterGame));
-        dispatcher.register(unregister);
+        dispatcher.asCommandDispatcher().register(unregister);
     }
 
-    private static int registerGame(CommandContext<CommandSource> context, boolean hasDescription) {
+    private static int registerGame(final CommandContext<CommandSource> context, boolean hasDescription) {
         final String key = StringArgumentType.getString(context, "key");
         final ITextComponent title = ComponentArgument.getComponent(context, "title");
         ITextComponent description = null;
         if (hasDescription) {
             description = ComponentArgument.getComponent(context, "description");
         }
-        MinigameManager.registerGame(key, title, description);
-        context.getSource().sendFeedback(new StringTextComponent(key), false);
-        return 1;
+        final NodeInteropClient interopClient = ((NodeCommandSource) context.getSource()).getInteropClient();
+        try {
+            MinigameManager.registerGame(interopClient, key, title, description);
+            context.getSource().sendFeedback(new StringTextComponent(key), false);
+            return 1;
+        } catch (MinigameRegistrationKeyConflictException ex) {
+            ((NodeCommandSource) context.getSource()).sendErrorMessage(ex);
+            return 0;
+        }
     }
 
     private static int unregisterGame(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        final NodeInteropClient interopClient = ((NodeCommandSource) context.getSource()).getInteropClient();
         Minigame game = MinigameArgument.getMinigame(context, "minigame");
-        MinigameManager.unregisterGame(game);
+        MinigameManager.unregisterGame(interopClient, game);
 
         context.getSource().sendFeedback(new StringTextComponent(game.getKey()), false);
         return 1;

@@ -113,17 +113,3 @@ issueTrackerURL="http://my.issue.tracker/" #optional
     versionRange="[1.15.2]"
     ordering="NONE"
     side="BOTH"
-
-    [[dependencies.dandoes_minigame_codslap]]
-    modId="dandoes_nodesupport"
-    mandatory=true
-    versionRange="[*]"
-    ordering="NONE"
-    side="SERVER"
-
-    [[dependencies.dandoes_minigame_codslap]]
-    modId="dandoes_minigame"
-    mandatory=true
-    versionRange="[*]"
-    ordering="NONE"
-    side="SERVER"

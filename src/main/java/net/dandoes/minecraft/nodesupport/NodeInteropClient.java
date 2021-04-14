@@ -26,13 +26,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class NodeClient {
-    private static final Logger LOGGER = LogManager.getLogger(NodeClient.class);
+public class NodeInteropClient {
+    private static final Logger LOGGER = LogManager.getLogger(NodeInteropClient.class);
 
     private final ChannelWriter writer;
     private final String newline = "\n";
 
-    public NodeClient(ChannelWriter writer) {
+    public NodeInteropClient(ChannelWriter writer) {
         this.writer = writer;
     }
 
@@ -76,10 +76,9 @@ public class NodeClient {
                     response.add(this.getTextContent((PlayerEntity)revengeTarget));
                 }
             }
-        } else if (event instanceof MinigameEvent) {
-            MinigameEvent minigameEvent = (MinigameEvent) event;
-            response.add(minigameEvent.getAction().getString());
-            response.add(minigameEvent.getGame().getKey());
+        } else if (event instanceof NodeInteropGameClientEvent) {
+            NodeInteropGameClientEvent nodeInteropGameClientEvent = (NodeInteropGameClientEvent) event;
+            response.addAll(nodeInteropGameClientEvent.getInteropResponseContent());
         }
 
         return String.join(newline, response);
@@ -198,6 +197,10 @@ public class NodeClient {
                 TranslationTextComponent text = (TranslationTextComponent) csEx.getRawMessage();
                 return text.getKey();
             }
+        }
+        if (ex instanceof NodeInteropCommandException) {
+            NodeInteropCommandException nicEx = (NodeInteropCommandException) ex;
+            return nicEx.getErrorTextKey();
         }
         LOGGER.warn("Unexpected exception type", ex);
         return "";

@@ -23,21 +23,18 @@ public class NodeInteropCommandMessageHandler implements NodeInteropMessageHandl
     private static final Set<String> singleThreadedCommands;
     private static final Map<String, ParseResults<CommandSource>> cmdCache = new HashMap<>();
 
-    private NodeClient client;
+    private final NodeInteropClient client;
     private final CommandDispatcher<CommandSource> dispatcher;
     private final ParseResults<CommandSource> parsedCmd;
     private final NodeCommandSource source;
     private final String requestId;
     private final String cmd = "";
 
-    public static NodeInteropCommandMessageHandler forCmd(final MinecraftServer server, final NodeClient client, String requestId, String cmd) {
+    public static NodeInteropCommandMessageHandler forCmd(final DedicatedServer server, final NodeInteropClient client, String requestId, String cmd) {
         LOGGER.debug("parsing command for requestId" + requestId + ": " + cmd);
-        NodeCommandSource source = new NodeCommandSource(server, requestId, client);
+//        NodeCommandSource source = new NodeCommandSource(server, requestId, client);
 //        ExecuteCommand
-        if (server instanceof DedicatedServer) {
-            DedicatedServer dServer = (DedicatedServer) server;
-            dServer.handleConsoleInput(cmd, source);
-        }
+//        server.handleConsoleInput(cmd, source);
 //        try {
 //            final ParseResults<CommandSource> parsedCmd = dispatcher.parse(cmd, source);
 //            return new NodeInteropCommandMessageHandler(server, client, parsedCmd);
@@ -53,7 +50,7 @@ public class NodeInteropCommandMessageHandler implements NodeInteropMessageHandl
         singleThreadedCommands = new HashSet<>(Arrays.asList(cmds));
     }
 
-    public NodeInteropCommandMessageHandler(final MinecraftServer server, final NodeClient client, final ParseResults<CommandSource> parsedCmd) {
+    public NodeInteropCommandMessageHandler(final MinecraftServer server, final NodeInteropClient client, final ParseResults<CommandSource> parsedCmd) {
         this.client = client;
         this.dispatcher = server.getCommandManager().getDispatcher();
         this.parsedCmd = parsedCmd;

@@ -8,9 +8,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
-import net.dandoes.minecraft.minigame.MinigameManager;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,19 +23,29 @@ import java.util.concurrent.locks.ReentrantLock;
 public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LogManager.getLogger(NodeInteropServerHandler.class);
 
+    private static final String MSG_PREFIX_INTEROP = "interop:";
+
+    private final NodeInteropServer interopServer;
     private final SocketChannel channel;
-    private final MinecraftServer server;
     private final StringBuilder buffer = new StringBuilder();
     private boolean isReady = false;
     private final char newline = "\n".charAt(0);
     private final Lock bufferLock = new ReentrantLock();
-    private NodeClient client;
+    private NodeInteropClient client;
     private String delimiter;
 
-    public NodeInteropServerHandler(SocketChannel channel, MinecraftServer server) {
+    public NodeInteropServerHandler(NodeInteropServer interopServer, SocketChannel channel) {
+        this.interopServer = interopServer;
         this.channel = channel;
-        this.server = server;
         LOGGER.debug("new NodeInteropServerHandler");
+    }
+
+    public DedicatedServer getServer() {
+        return this.interopServer.getServer();
+    }
+
+    public NodeInteropClient getClient() {
+        return client;
     }
 
     @Override
@@ -53,7 +62,7 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
                     LOGGER.debug("got delimiter: " + this.delimiter);
                     try {
                         ChannelWriter writer = new ChannelWriter(this.channel, this.delimiter);
-                        this.client = new NodeClient(writer);
+                        this.client = new NodeInteropClient(writer);
                         this.channel.writeAndFlush(Unpooled.copiedBuffer(this.delimiter, CharsetUtil.UTF_8)).sync();
                     } catch (Exception ex) {
                         LOGGER.error(ex);
@@ -62,7 +71,7 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
                 }
                 this.buffer.append(c);
             }
-            LOGGER.debug("done reading channel: " + this.buffer.toString());
+            LOGGER.debug("done reading channel: " + this.buffer);
         } finally {
             this.bufferLock.unlock();
             ReferenceCountUtil.release(msg);
@@ -122,21 +131,26 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
         String requestId = parts[0];
         String type = parts[1];
         String cmd = parts[2];
-        NodeCommandSource source = new NodeCommandSource(server, requestId, client);
+        NodeCommandSource source = new NodeCommandSource(this.interopServer, this.client, requestId);
         this.handleCommand(source, type, cmd);
     }
 
-    private void handleCommand(NodeCommandSource source, String type, String cmd) throws Exception {
+    private void handleCommand(NodeCommandSource source, String type, String cmd) {
         if (type.equals("cmd")) {
-            if (server instanceof DedicatedServer) {
-                DedicatedServer dServer = (DedicatedServer) server;
-                dServer.handleConsoleInput(cmd, source);
-            } else {
-                throw new Exception("wha huh?");
-            }
+            this.getServer().handleConsoleInput(cmd, source);
+            return;
         }
-        if (type.equals("minigame")) {
-            MinigameManager.handleMessage(source, cmd);
+
+        if (type.startsWith(MSG_PREFIX_INTEROP)) {
+            this.onInteropCommand(source, type, cmd);
+            return;
         }
+
+        LOGGER.warn("Unrecognized message: {}", cmd);
+    }
+
+    private void onInteropCommand(final NodeCommandSource source, final String type, final String cmd) {
+        NodeInteropCommandEvent event = new NodeInteropCommandEvent(this.getServer(), this.client, source, type, cmd);
+        MinecraftForge.EVENT_BUS.post(event);
     }
 }

@@ -7,7 +7,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,12 +15,18 @@ import org.apache.logging.log4j.Logger;
 public class NodeInteropServer {
     private static final Logger LOGGER = LogManager.getLogger(NodeInteropServer.class);
 
-    private int port;
+    private final DedicatedServer server;
+    private final int port;
     private final NodeInteropChannelHandler handler;
 
-    public NodeInteropServer(int port, MinecraftServer server) {
+    public NodeInteropServer(final DedicatedServer server, int port) {
+        this.server = server;
+        this.handler = new NodeInteropChannelHandler(this);
         this.port = port;
-        this.handler = new NodeInteropChannelHandler(server);
+    }
+
+    public DedicatedServer getServer() {
+        return server;
     }
 
     public void run() throws Exception {
@@ -46,7 +52,11 @@ public class NodeInteropServer {
     }
 
     public void broadcast(Event event) {
-        this.handler.broadcast(event);
+        try {
+            this.handler.broadcast(event);
+        } catch (Exception ex) {
+            LOGGER.error(ex);
+        }
     }
 
 }

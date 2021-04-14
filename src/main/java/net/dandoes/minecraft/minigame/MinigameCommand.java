@@ -1,12 +1,13 @@
 package net.dandoes.minecraft.minigame;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.dandoes.minecraft.nodesupport.NodeInteropChannelHandler;
-import net.dandoes.minecraft.minigame.event.MinigameEvent;
+import net.dandoes.minecraft.minigame.event.MinigameGameClientEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraftforge.common.MinecraftForge;
 
 public class MinigameCommand {
 
@@ -18,10 +19,7 @@ public class MinigameCommand {
             Commands.literal("start").then(
                 Commands.argument("minigame", MinigameArgument.minigames())
                     .suggests(MinigameArgument.SUGGEST_MINIGAMES)
-                    .executes(context -> {
-                        NodeInteropChannelHandler.checkHasHandler();
-                        return startGame(context, MinigameArgument.getMinigame(context, "minigame"));
-                    })
+                    .executes(context -> startGame(context, MinigameArgument.getMinigame(context, "minigame")))
             )
         );
 
@@ -29,10 +27,10 @@ public class MinigameCommand {
     }
 
     public static int startGame(CommandContext<CommandSource> context, Minigame game) {
-        MinigameEvent event = new MinigameEvent.MinigameStartEvent(game);
-        final int result = NodeInteropChannelHandler.sendToAllHandlers(event);
+        MinigameGameClientEvent event = new MinigameGameClientEvent.MinigameStartGameClientEvent(game);
+        MinecraftForge.EVENT_BUS.post(event);
         context.getSource().sendFeedback(event.getAction(), true);
-        return result;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

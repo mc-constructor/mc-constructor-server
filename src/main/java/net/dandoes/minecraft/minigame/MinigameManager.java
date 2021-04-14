@@ -1,41 +1,57 @@
 package net.dandoes.minecraft.minigame;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.dandoes.minecraft.nodesupport.NodeCommandDispatcher;
-import net.dandoes.minecraft.nodesupport.NodeCommandSource;
-import net.minecraft.command.CommandSource;
+import net.dandoes.minecraft.nodesupport.*;
 import net.minecraft.util.text.ITextComponent;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MinigameManager {
 
     private static final NodeCommandDispatcher dispatcher = new NodeCommandDispatcher();
     private static final Map<String, Minigame> games = new HashMap<>();
+    private static final Map<NodeInteropClient, Set<String>> interopClientGames = new HashMap<>();
 
     static {
-        MinigameManagerCommand.register((CommandDispatcher<CommandSource>) (Object) dispatcher);
+        MinigameManagerCommand.register(dispatcher);
     }
 
-    public static void handleMessage(NodeCommandSource source, String cmd) {
+    public static void handleCommand(NodeInteropCommandEvent event) {
+        final NodeCommandSource source = event.getSource();
         try {
-            dispatcher.execute(cmd, source);
+            dispatcher.execute(event.getCmd(), source);
         } catch (CommandSyntaxException ex) {
             source.sendErrorMessage(ex);
         }
     }
 
-    public static Minigame registerGame(String key, ITextComponent title, ITextComponent description) {
+    public static Minigame registerGame(final NodeInteropClient interopClient, String key, ITextComponent title, ITextComponent description) throws MinigameRegistrationKeyConflictException {
         Minigame game = new Minigame(key, title, description);
+
+        if (games.containsKey(key)) {
+            throw new MinigameRegistrationKeyConflictException();
+        }
+
         games.put(key, game);
+        if (!interopClientGames.containsKey(interopClient)) {
+            interopClientGames.put(interopClient, new HashSet<>());
+        }
+        interopClientGames.get(interopClient).add(key);
         return game;
     }
 
-    public static void unregisterGame(Minigame game) {
+    public static void unregisterGame(final NodeInteropClient interopClient, Minigame game) {
         games.remove(game.getKey());
+        if (interopClientGames.containsKey(interopClient)) {
+            interopClientGames.get(interopClient).remove(game.getKey());
+        }
+    }
+
+    public static void removeInteropClient(final NodeInteropClient interopClient) {
+        if (!interopClientGames.containsKey(interopClient)) {
+            return;
+        }
+        interopClientGames.get(interopClient).forEach(key -> unregisterGame(interopClient, games.get(key)));
     }
 
     public static Minigame getGame(final String key) {
