@@ -1,17 +1,24 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
         jcenter()
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
+    dependencies {
+        classpath "org.hidetake:gradle-ssh-plugin:2.10.1"
+    }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: "org.hidetake.ssh"
 
 version = '1.0'
 group = 'net.dandoes.minecraft' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -143,6 +150,25 @@ publishing {
     repositories {
         maven {
             url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+remotes {
+    webServer {
+        host = '192.168.1.50'
+        user = 'daniel'
+        identity = file('id_rsa')
+    }
+}
+
+task deploy {
+    doLast {
+        ssh.run {
+            session(remotes.webServer) {
+                put from: 'example.war', into: '/webapps'
+                execute 'sudo service tomcat restart'
+            }
         }
     }
 }

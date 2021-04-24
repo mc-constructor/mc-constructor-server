@@ -10,7 +10,6 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,12 +85,6 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
 //        ctx.close();
     }
 
-    public void sendEvent(Event event) {
-        if (this.client != null) {
-            this.client.sendEvent(event);
-        }
-    }
-
     private void checkBuffer() throws Exception {
         int endMessageIndex = this.buffer.indexOf(this.delimiter);
         if (endMessageIndex < 0) {
@@ -141,12 +134,18 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
+        if (type.equals("eventSubscription")) {
+            NodeInteropClientSubscriptionCommandEvent event = new NodeInteropClientSubscriptionCommandEvent(source, cmd);
+            MinecraftForge.EVENT_BUS.post(event);
+            return;
+        }
+
         if (type.startsWith(MSG_PREFIX_INTEROP)) {
             this.onInteropCommand(source, type, cmd);
             return;
         }
 
-        LOGGER.warn("Unrecognized message: {}", cmd);
+        LOGGER.warn("Unrecognized message type: {}", type);
     }
 
     private void onInteropCommand(final NodeCommandSource source, final String type, final String cmd) {

@@ -88,12 +88,12 @@ issueTrackerURL="http://my.issue.tracker/" #optional
         ordering="NONE"
         side="BOTH"
 
-    [[dependencies.dandoes_minigame]]
-        modId="dandoes_nodesupport"
-        mandatory=true
-        versionRange="[*]"
-        ordering="NONE"
-        side="SERVER"
+#    [[dependencies.dandoes_minigame]]
+#        modId="dandoes_nodesupport"
+#        mandatory=true
+#        versionRange="[*]"
+#        ordering="NONE"
+#        side="SERVER"
 
 [[mods]]
 

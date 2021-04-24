@@ -8,7 +8,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraftforge.eventbus.api.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,13 +49,4 @@ public class NodeInteropServer {
             bossGroup.shutdownGracefully();
         });
     }
-
-    public void broadcast(Event event) {
-        try {
-            this.handler.broadcast(event);
-        } catch (Exception ex) {
-            LOGGER.error(ex);
-        }
-    }
-
 }

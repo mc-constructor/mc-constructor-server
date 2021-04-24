@@ -33,7 +33,7 @@ public class NodeCommandSource extends CommandSource {
             "Server",
             new StringTextComponent("Server"),
             server,
-            (Entity)null
+            null
         );
         this.interopServer = interopServer;
         this.interopClient = interopClient;

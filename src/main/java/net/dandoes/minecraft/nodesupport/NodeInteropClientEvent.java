@@ -5,6 +5,7 @@ public class NodeInteropClientEvent extends NodeInteropEvent {
     private final NodeInteropClient interopClient;
 
     NodeInteropClientEvent(final NodeInteropClient interopClient) {
+        super();
         this.interopClient = interopClient;
     }
 

@@ -13,24 +13,26 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class NodeInteropClient {
     private static final Logger LOGGER = LogManager.getLogger(NodeInteropClient.class);
 
     private final ChannelWriter writer;
     private final String newline = "\n";
+
+    private final Map<Class<? extends Event>, Consumer<? extends Event>> subscribedEvents = new HashMap<>();
 
     public NodeInteropClient(ChannelWriter writer) {
         this.writer = writer;
@@ -45,6 +47,22 @@ public class NodeInteropClient {
     }
     public void sendResponse(NodeCommandSource source, Exception ex) {
         this.writer.writeMessage(this.buildCommandResponse(source, ex));
+    }
+
+    public <C extends Class<T>, T extends Event> void subscribeToEvent(C eventClass) {
+        if (!this.subscribedEvents.containsKey(eventClass)) {
+            Consumer<T> consumer = (final T event) -> this.sendEvent(event);
+            MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, eventClass, consumer);
+            this.subscribedEvents.put(eventClass, consumer);
+        }
+    }
+
+    public void unsubscribeFromEvent(Class<? extends Event> eventClass) {
+        if (this.subscribedEvents.containsKey(eventClass)) {
+            Consumer<? extends Event> consumer = this.subscribedEvents.get(eventClass);
+            MinecraftForge.EVENT_BUS.unregister(consumer);
+            this.subscribedEvents.remove(eventClass);
+        }
     }
 
     private String buildEventResponse(Event event) {
@@ -205,5 +223,4 @@ public class NodeInteropClient {
         LOGGER.warn("Unexpected exception type", ex);
         return "";
     }
-
 }

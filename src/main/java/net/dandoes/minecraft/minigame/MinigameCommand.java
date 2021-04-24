@@ -7,7 +7,11 @@ import com.mojang.brigadier.context.CommandContext;
 import net.dandoes.minecraft.minigame.event.MinigameGameClientEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.Collection;
 
 public class MinigameCommand {
 
@@ -23,7 +27,43 @@ public class MinigameCommand {
             )
         );
 
+        b.then(
+            Commands.literal("list").executes(MinigameCommand::listGames)
+        );
+
         dispatcher.register(b);
+    }
+
+    public static int listGames(CommandContext<CommandSource> context) {
+        final CommandSource source = context.getSource();
+        final Collection<Minigame> games = MinigameManager.getGames();
+        if (games.isEmpty()) {
+            source.sendFeedback(new TranslationTextComponent("event.minigame.list.empty"), true);
+            return Command.SINGLE_SUCCESS;
+        }
+        for (final Minigame game : MinigameManager.getGames()) {
+           MinigameCommand.listGame(source, game);
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static void listGame(final CommandSource source, final Minigame game) {
+        final ITextComponent gameTitleText = new TranslationTextComponent(
+            "event.minigame.list.game.title",
+            game.getTitle(),
+            game.getKey()
+        );
+        source.sendFeedback(gameTitleText, true);
+
+        final ITextComponent description = game.getDescription();
+        if (description == null) {
+            return;
+        }
+
+        final ITextComponent gameDescriptionText = new TranslationTextComponent(
+                "event.minigame.list.game.description",
+                description);
+        source.sendFeedback(gameDescriptionText, true);
     }
 
     public static int startGame(CommandContext<CommandSource> context, Minigame game) {
