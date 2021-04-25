@@ -27,7 +27,7 @@ public class MinigameArgument implements ArgumentType<MinigameSelector> {
         return context.getArgument(name, MinigameSelector.class).getGame(context.getSource());
     }
 
-    public static MinigameArgument minigames() {
+    public static MinigameArgument minigameArgument() {
         return new MinigameArgument();
     }
 

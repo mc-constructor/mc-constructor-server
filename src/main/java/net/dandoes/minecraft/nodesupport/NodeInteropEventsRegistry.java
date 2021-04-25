@@ -31,7 +31,7 @@ public class NodeInteropEventsRegistry {
                     interopClient.unsubscribeFromEvent(eventClass);
                     break;
             }
-            source.sendFeedback(new StringTextComponent("ok"), true);
+            source.sendSuccess(new StringTextComponent("ok"), true);
         } catch (ClassNotFoundException ex) {
             interopClient.sendResponse(source, ex);
             ex.printStackTrace();

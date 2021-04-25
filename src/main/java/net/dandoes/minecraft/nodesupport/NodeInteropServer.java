@@ -8,9 +8,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,16 +21,15 @@ public class NodeInteropServer {
     private final NodeInteropChannelHandler handler;
     private final CompletableFuture<DedicatedServer> server;
 
-    public NodeInteropServer(final DedicatedServer server, int port) {
+    public NodeInteropServer(int port) {
         this.handler = new NodeInteropChannelHandler(this);
         this.port = port;
         this.server = new CompletableFuture<>();
-        try {
-            server.getWorld(DimensionType.OVERWORLD);
-            this.server.complete(server);
-        } catch (IllegalArgumentException ex) {
-            MinecraftForge.EVENT_BUS.addListener((final FMLServerStartingEvent event) -> this.server.complete(server));
-        }
+    }
+
+    protected void ready(final DedicatedServer server) {
+        LOGGER.debug("ready (got server reference)");
+        this.server.complete(server);
     }
 
     public DedicatedServer getServer() {
@@ -45,7 +41,8 @@ public class NodeInteropServer {
         return null;
     }
 
-    public void run() throws Exception {
+    public void run() {
+        LOGGER.debug("starting...");
         EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         ServerBootstrap b = new ServerBootstrap(); // (2)
@@ -57,7 +54,7 @@ public class NodeInteropServer {
             .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 
         // Bind and start to accept incoming connections.
-        ChannelFuture f = b.bind(port).sync(); // (7)
+        ChannelFuture f = b.bind(port).syncUninterruptibly(); // (7)
         LOGGER.info("listening on port " + port);
 
         // Wait until the server socket is closed.

@@ -4,7 +4,8 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.*;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,26 +21,22 @@ public class NodeSupportMod
     private NodeInteropServer interopServer;
 
     public NodeSupportMod() {
-        FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onServerSetup);
+    }
+
+    public void onServerSetup(final FMLDedicatedServerSetupEvent event) {
+        MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new NodeInteropEventsRegistry());
+
+        this.interopServer = new NodeInteropServer(8888);
+        this.interopServer.run();
     }
 
     @SubscribeEvent
-    public void serverSetup(final FMLDedicatedServerSetupEvent event) {
-        if (this.interopServer != null) {
-            return;
-        }
-
-        LOGGER.debug("Starting NodeInteropServer");
-        DedicatedServer server = event.getServerSupplier().get();
-        this.interopServer = new NodeInteropServer(server, 8888);
-
-        try {
-            this.interopServer.run();
-        } catch (Exception ex) {
-            event.setCanceled(true);
-            LOGGER.error(ex);
-        }
+    public void onServerAboutToStart(final FMLServerAboutToStartEvent event) {
+        LOGGER.debug("onServerAboutToStart");
+        this.interopServer.ready((DedicatedServer) event.getServer());
     }
+
 
 }

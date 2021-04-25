@@ -1,10 +1,10 @@
 package net.dandoes.minecraft.minigame;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.dandoes.minecraft.nodesupport.NodeCommandDispatcher;
 import net.dandoes.minecraft.nodesupport.NodeCommandSource;
 import net.dandoes.minecraft.nodesupport.NodeInteropClient;
 import net.minecraft.command.CommandSource;
@@ -36,11 +36,11 @@ public class MinigameManagerCommand {
 //        })))))));
 //    }
 
-    public static void register(final NodeCommandDispatcher dispatcher) {
+    public static void register(final CommandDispatcher<CommandSource> dispatcher) {
 //        final ScoreboardCommand
         LiteralArgumentBuilder<CommandSource> register = Commands.literal("register")
             .then(Commands.argument("key", StringArgumentType.word())
-                .then(Commands.argument("title", ComponentArgument.component())
+                .then(Commands.argument("title", ComponentArgument.textComponent())
 
                     // no description
                     .executes(context -> registerGame(context, false))));
@@ -52,14 +52,14 @@ public class MinigameManagerCommand {
 
 //                )));
 
-        dispatcher.asCommandDispatcher().register(register);
+        dispatcher.register(register);
 
         LiteralArgumentBuilder<CommandSource> unregister =
             Commands.literal("unregister")
-                .then(Commands.argument("minigame", MinigameArgument.minigames())
+                .then(Commands.argument("minigame", MinigameArgument.minigameArgument())
                     .suggests(MinigameArgument.SUGGEST_MINIGAMES)
                     .executes(MinigameManagerCommand::unregisterGame));
-        dispatcher.asCommandDispatcher().register(unregister);
+        dispatcher.register(unregister);
     }
 
     private static int registerGame(final CommandContext<CommandSource> context, boolean hasDescription) {
@@ -72,7 +72,7 @@ public class MinigameManagerCommand {
         final NodeInteropClient interopClient = ((NodeCommandSource) context.getSource()).getInteropClient();
         try {
             MinigameManager.registerGame(interopClient, key, title, description);
-            context.getSource().sendFeedback(new StringTextComponent(key), false);
+            context.getSource().sendSuccess(new StringTextComponent(key), false);
             return 1;
         } catch (MinigameRegistrationKeyConflictException ex) {
             ((NodeCommandSource) context.getSource()).sendErrorMessage(ex);
@@ -85,7 +85,7 @@ public class MinigameManagerCommand {
         Minigame game = MinigameArgument.getMinigame(context, "minigame");
         MinigameManager.unregisterGame(interopClient, game);
 
-        context.getSource().sendFeedback(new StringTextComponent(game.getKey()), false);
+        context.getSource().sendSuccess(new StringTextComponent(game.getKey()), false);
         return 1;
     }
 

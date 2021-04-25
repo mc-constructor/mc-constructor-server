@@ -88,7 +88,8 @@ public class NodeInteropClient {
             if (event instanceof LivingDeathEvent) {
                 LivingDeathEvent deathEvent = (LivingDeathEvent) event;
                 response.add(this.getTextContent(deathEvent.getSource()));
-                Entity revengeTarget = deathEvent.getEntityLiving().getRevengeTarget();
+                DamageSource deathSource = deathEvent.getSource();
+                Entity revengeTarget = deathSource.getDirectEntity();
                 if (revengeTarget instanceof PlayerEntity) {
                     response.add("player");
                     response.add(this.getTextContent((PlayerEntity)revengeTarget));
@@ -106,28 +107,35 @@ public class NodeInteropClient {
         List<String> response = this.buildCommandResponse(source, true);
 
         if (message instanceof TranslationTextComponent) {
-            TranslationTextComponent text = (TranslationTextComponent) message;
-            response.add(text.getKey());
-
-            for (Object arg : text.getFormatArgs()) {
-                if (arg instanceof TextComponent) {
-                    response.add(this.getTextContent((ITextComponent)arg));
-                    continue;
-                }
-                response.add(arg.toString());
-            }
+            this.addResponseContent((TranslationTextComponent) message, response);
         }
 
         return String.join(newline, response);
     }
 
+    private void addResponseContent(TranslationTextComponent text, List<String> response) {
+        response.add(text.getKey());
+
+        for (Object arg : text.getArgs()) {
+            if (arg instanceof TranslationTextComponent) {
+                this.addResponseContent((TranslationTextComponent) arg, response);
+                continue;
+            }
+            if (arg instanceof TextComponent) {
+                response.add(this.getTextContent((ITextComponent)arg));
+                continue;
+            }
+            response.add(arg.toString());
+        }
+    }
+
     private String getTextContent(PlayerEntity player) {
         List<String> content = new ArrayList<>();
-        content.add(this.getTextContent(player.getDisplayNameAndUUID()));
+        content.add(String.format("%s %s", this.getTextContent(player.getDisplayName()), player.getUUID()));
 
         // held items
-        ItemStack mainHandStack = player.getItemStackFromSlot(EquipmentSlotType.MAINHAND);
-        ItemStack offHandStack = player.getItemStackFromSlot(EquipmentSlotType.OFFHAND);
+        ItemStack mainHandStack = player.getItemBySlot(EquipmentSlotType.MAINHAND);
+        ItemStack offHandStack = player.getItemBySlot(EquipmentSlotType.OFFHAND);
         content.add(this.getTextContent(mainHandStack));
         content.add(this.getTextContent(offHandStack));
 
@@ -142,7 +150,7 @@ public class NodeInteropClient {
         if (insertion != null) {
             return insertion;
         }
-        StringBuilder content = new StringBuilder(text.getUnformattedComponentText());
+        StringBuilder content = new StringBuilder(text.getContents());
         for (ITextComponent sibling : text.getSiblings()) {
             content.append(this.getTextContent(sibling));
         }
@@ -181,7 +189,7 @@ public class NodeInteropClient {
     private String getTextContent(DamageSource damageSource) {
         List<String> content = new ArrayList<>();
 
-        content.add(damageSource.getDamageType());
+        content.add(damageSource.getMsgId());
 
 //        if (damageSource instanceof EntityDamageSource) {
 //            EntityDamageSource entityDamageSource = (EntityDamageSource) damageSource;

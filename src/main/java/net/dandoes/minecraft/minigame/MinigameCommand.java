@@ -17,11 +17,11 @@ public class MinigameCommand {
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         LiteralArgumentBuilder<CommandSource> b = Commands.literal("minigame")
-            .requires((player) -> player.hasPermissionLevel(1));
+            .requires((player) -> player.hasPermission(1));
 
         b.then(
             Commands.literal("start").then(
-                Commands.argument("minigame", MinigameArgument.minigames())
+                Commands.argument("minigame", MinigameArgument.minigameArgument())
                     .suggests(MinigameArgument.SUGGEST_MINIGAMES)
                     .executes(context -> startGame(context, MinigameArgument.getMinigame(context, "minigame")))
             )
@@ -38,7 +38,7 @@ public class MinigameCommand {
         final CommandSource source = context.getSource();
         final Collection<Minigame> games = MinigameManager.getGames();
         if (games.isEmpty()) {
-            source.sendFeedback(new TranslationTextComponent("event.minigame.list.empty"), true);
+            source.sendSuccess(new TranslationTextComponent("event.minigame.list.empty"), true);
             return Command.SINGLE_SUCCESS;
         }
         for (final Minigame game : MinigameManager.getGames()) {
@@ -53,7 +53,7 @@ public class MinigameCommand {
             game.getTitle(),
             game.getKey()
         );
-        source.sendFeedback(gameTitleText, true);
+        source.sendSuccess(gameTitleText, true);
 
         final ITextComponent description = game.getDescription();
         if (description == null) {
@@ -63,13 +63,13 @@ public class MinigameCommand {
         final ITextComponent gameDescriptionText = new TranslationTextComponent(
                 "event.minigame.list.game.description",
                 description);
-        source.sendFeedback(gameDescriptionText, true);
+        source.sendSuccess(gameDescriptionText, true);
     }
 
     public static int startGame(CommandContext<CommandSource> context, Minigame game) {
         MinigameGameClientEvent event = new MinigameGameClientEvent.MinigameStartGameClientEvent(game);
         MinecraftForge.EVENT_BUS.post(event);
-        context.getSource().sendFeedback(event.getAction(), true);
+        context.getSource().sendSuccess(event.getAction(), true);
         return Command.SINGLE_SUCCESS;
     }
 

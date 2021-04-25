@@ -1,23 +1,21 @@
 package net.dandoes.minecraft.minigame;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.dandoes.minecraft.nodesupport.*;
+import net.minecraft.command.CommandSource;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.*;
 
 public class MinigameManager {
 
-    private static final NodeCommandDispatcher dispatcher = new NodeCommandDispatcher();
     private static final Map<String, Minigame> games = new HashMap<>();
     private static final Map<NodeInteropClient, Set<String>> interopClientGames = new HashMap<>();
 
-    static {
-        MinigameManagerCommand.register(dispatcher);
-    }
-
     public static void handleCommand(NodeInteropCommandEvent event) {
         final NodeCommandSource source = event.getSource();
+        final CommandDispatcher<CommandSource> dispatcher = event.getServer().getCommands().getDispatcher();
         try {
             dispatcher.execute(event.getCmd(), source);
         } catch (CommandSyntaxException ex) {

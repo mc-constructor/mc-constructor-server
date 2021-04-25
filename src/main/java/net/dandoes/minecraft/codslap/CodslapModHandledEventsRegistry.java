@@ -1,8 +1,10 @@
 package net.dandoes.minecraft.codslap;
 
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
@@ -19,19 +21,20 @@ public class CodslapModHandledEventsRegistry {
 
     @SubscribeEvent
     public void onKnockbackEvent(final LivingKnockBackEvent event) {
-        if (!(event.getAttacker() instanceof ServerPlayerEntity)) {
+        final LivingEntity attacker = event.getEntityLiving().getLastHurtByMob();
+        if (!(attacker instanceof ServerPlayerEntity)) {
             return;
         }
-        ServerPlayerEntity player = (ServerPlayerEntity) event.getAttacker();
+        ServerPlayerEntity player = (ServerPlayerEntity) attacker;
         // null check: first swing after join / spawn is null sometimes?
-        if (player.swingingHand == null) {
+        if (player.swingingArm == null) {
             LOGGER.warn("Player.swingingHand was null, assuming main hand");
-        } else if (player.swingingHand != Hand.MAIN_HAND) {
+        } else if (player.swingingArm != Hand.MAIN_HAND) {
             return;
         }
-        ItemStack weaponStack = player.getHeldItem(Hand.MAIN_HAND);
-        Multimap<String, AttributeModifier> modifiers = weaponStack.getAttributeModifiers(EquipmentSlotType.MAINHAND);
-        Collection<AttributeModifier> knockbackModifiers = modifiers.get(SharedMonsterAttributes.ATTACK_KNOCKBACK.getName());
+        ItemStack weaponStack = player.getMainHandItem();
+        Multimap<Attribute, AttributeModifier> modifiers = weaponStack.getAttributeModifiers(EquipmentSlotType.MAINHAND);
+        Collection<AttributeModifier> knockbackModifiers = modifiers.get(Attributes.ATTACK_KNOCKBACK);
         if (knockbackModifiers != null) {
             LOGGER.info("Base knockback: " + event.getStrength());
             float base = getBaseKnockback(knockbackModifiers, event.getStrength());

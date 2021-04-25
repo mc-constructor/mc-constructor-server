@@ -52,7 +52,7 @@ public class NodeInteropCommandMessageHandler implements NodeInteropMessageHandl
 
     public NodeInteropCommandMessageHandler(final MinecraftServer server, final NodeInteropClient client, final ParseResults<CommandSource> parsedCmd) {
         this.client = client;
-        this.dispatcher = server.getCommandManager().getDispatcher();
+        this.dispatcher = server.getCommands().getDispatcher();
         this.parsedCmd = parsedCmd;
         this.source = (NodeCommandSource) parsedCmd.getContext().getSource();
         this.requestId = source.getRequestId();
