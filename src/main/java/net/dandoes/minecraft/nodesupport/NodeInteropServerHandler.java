@@ -124,7 +124,7 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
         String requestId = parts[0];
         String type = parts[1];
         String cmd = parts[2];
-        NodeCommandSource source = new NodeCommandSource(this.interopServer, this.client, requestId);
+        NodeCommandSource source = new NodeCommandSource(this.getServer(), this.client, requestId);
         this.handleCommand(source, type, cmd);
     }
 

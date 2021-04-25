@@ -2,7 +2,6 @@ package net.dandoes.minecraft.nodesupport;
 
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -15,18 +14,13 @@ import org.apache.logging.log4j.Logger;
 public class NodeCommandSource extends CommandSource {
     private static final Logger LOGGER = LogManager.getLogger(NodeCommandSource.class);
 
-    private final NodeInteropServer interopServer;
     private final NodeInteropClient interopClient;
     private final String requestId;
 
-    public NodeCommandSource(final NodeInteropServer interopServer, final NodeInteropClient interopClient, final String requestId) {
-        this(interopServer, interopServer.getServer(), interopClient, requestId);
-    }
-
-    protected NodeCommandSource(final NodeInteropServer interopServer, final DedicatedServer server, final NodeInteropClient interopClient, final String requestId) {
+    public NodeCommandSource(final DedicatedServer server, final NodeInteropClient interopClient, final String requestId) {
         super(
             server,
-            server.getWorld(DimensionType.OVERWORLD) == null ? Vec3d.ZERO : new Vec3d(interopServer.getServer().getWorld(DimensionType.OVERWORLD).getSpawnPoint()),
+            server.getWorld(DimensionType.OVERWORLD) == null ? Vec3d.ZERO : new Vec3d(server.getWorld(DimensionType.OVERWORLD).getSpawnPoint()),
             Vec2f.ZERO,
             server.getWorld(DimensionType.OVERWORLD),
             4,
@@ -35,13 +29,8 @@ public class NodeCommandSource extends CommandSource {
             server,
             null
         );
-        this.interopServer = interopServer;
         this.interopClient = interopClient;
         this.requestId = requestId;
-    }
-
-    public NodeInteropServer getInteropServer() {
-        return this.interopServer;
     }
 
     public NodeInteropClient getInteropClient() {
