@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropClientDisconnectEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +26,7 @@ public class NodeInteropChannelHandler extends ChannelInitializer<SocketChannel>
     }
 
     @Override
-    protected void initChannel(SocketChannel ch) {
+    protected void initChannel(final SocketChannel ch) {
         LOGGER.debug("NodeInteropServer.initChannel");
         final NodeInteropServerHandler handler = new NodeInteropServerHandler(this.interopServer, ch);
         ch.pipeline().addLast(handler);

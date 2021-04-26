@@ -1,4 +1,6 @@
-package net.dandoes.minecraft.nodesupport;
+package net.dandoes.minecraft.nodesupport.event;
+
+import net.dandoes.minecraft.nodesupport.NodeInteropClient;
 
 public class NodeInteropClientEvent extends NodeInteropEvent {
 

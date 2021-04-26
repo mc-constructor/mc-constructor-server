@@ -1,6 +1,7 @@
 package net.dandoes.minecraft.nodesupport;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropGameClientEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -34,59 +35,59 @@ public class NodeInteropClient {
 
     private final Map<Class<? extends Event>, Consumer<? extends Event>> subscribedEvents = new HashMap<>();
 
-    public NodeInteropClient(ChannelWriter writer) {
+    public NodeInteropClient(final ChannelWriter writer) {
         this.writer = writer;
     }
 
-    public void sendEvent(Event event) {
+    public void sendEvent(final Event event) {
         this.writer.writeMessage(this.buildEventResponse(event));
     }
 
-    public void sendResponse(NodeCommandSource source, ITextComponent message) {
+    public void sendResponse(final NodeCommandSource source, final ITextComponent message) {
         this.writer.writeMessage(this.buildCommandResponse(source, message));
     }
-    public void sendResponse(NodeCommandSource source, Exception ex) {
+    public void sendResponse(final NodeCommandSource source, final Exception ex) {
         this.writer.writeMessage(this.buildCommandResponse(source, ex));
     }
 
-    public <C extends Class<T>, T extends Event> void subscribeToEvent(C eventClass) {
+    public <C extends Class<T>, T extends Event> void subscribeToEvent(final C eventClass) {
         if (!this.subscribedEvents.containsKey(eventClass)) {
-            Consumer<T> consumer = (final T event) -> this.sendEvent(event);
+            final Consumer<T> consumer = (final T event) -> this.sendEvent(event);
             MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, eventClass, consumer);
             this.subscribedEvents.put(eventClass, consumer);
         }
     }
 
-    public void unsubscribeFromEvent(Class<? extends Event> eventClass) {
+    public void unsubscribeFromEvent(final Class<? extends Event> eventClass) {
         if (this.subscribedEvents.containsKey(eventClass)) {
-            Consumer<? extends Event> consumer = this.subscribedEvents.get(eventClass);
+            final Consumer<? extends Event> consumer = this.subscribedEvents.get(eventClass);
             MinecraftForge.EVENT_BUS.unregister(consumer);
             this.subscribedEvents.remove(eventClass);
         }
     }
 
-    private String buildEventResponse(Event event) {
-        List<String> response = new ArrayList<>();
+    private String buildEventResponse(final Event event) {
+        final List<String> response = new ArrayList<>();
         response.add(UUID.randomUUID().toString());
         response.add(event.getClass().getName());
 
         if (event instanceof PlayerEvent) {
-            PlayerEvent playerEvent = (PlayerEvent) event;
-            PlayerEntity player = playerEvent.getPlayer();
+            final PlayerEvent playerEvent = (PlayerEvent) event;
+            final PlayerEntity player = playerEvent.getPlayer();
             response.add(this.getTextContent(player));
 
             if (event instanceof PlayerInteractEvent) {
-                PlayerInteractEvent intEvent = (PlayerInteractEvent) event;
+                final PlayerInteractEvent intEvent = (PlayerInteractEvent) event;
                 response.add(intEvent.getHand().toString());
                 response.add(intEvent.getPos().toString());
                 response.add(intEvent.getFace().getName());
             }
         } else if (event instanceof EntityEvent) {
-            EntityEvent entityEvent = (EntityEvent) event;
+            final EntityEvent entityEvent = (EntityEvent) event;
             response.add(this.getTextContent(entityEvent.getEntity().getName()));
 
             if (event instanceof LivingDeathEvent) {
-                LivingDeathEvent deathEvent = (LivingDeathEvent) event;
+                final LivingDeathEvent deathEvent = (LivingDeathEvent) event;
                 response.add(this.getTextContent(deathEvent.getSource()));
                 final Entity revengeTarget = ((LivingDeathEvent) event).getEntityLiving().getLastHurtByMob();
                 if (revengeTarget instanceof PlayerEntity) {
@@ -95,15 +96,15 @@ public class NodeInteropClient {
                 }
             }
         } else if (event instanceof NodeInteropGameClientEvent) {
-            NodeInteropGameClientEvent nodeInteropGameClientEvent = (NodeInteropGameClientEvent) event;
+            final NodeInteropGameClientEvent nodeInteropGameClientEvent = (NodeInteropGameClientEvent) event;
             response.addAll(nodeInteropGameClientEvent.getInteropResponseContent());
         }
 
         return String.join(newline, response);
     }
 
-    private String buildCommandResponse(NodeCommandSource source, ITextComponent message) {
-        List<String> response = this.buildCommandResponse(source, true);
+    private String buildCommandResponse(final NodeCommandSource source, final ITextComponent message) {
+        final List<String> response = this.buildCommandResponse(source, true);
 
         if (message instanceof TranslationTextComponent) {
             this.addResponseContent((TranslationTextComponent) message, response);
@@ -112,10 +113,10 @@ public class NodeInteropClient {
         return String.join(newline, response);
     }
 
-    private void addResponseContent(TranslationTextComponent text, List<String> response) {
+    private void addResponseContent(final TranslationTextComponent text, final List<String> response) {
         response.add(text.getKey());
 
-        for (Object arg : text.getArgs()) {
+        for (final Object arg : text.getArgs()) {
             if (arg instanceof TranslationTextComponent) {
                 this.addResponseContent((TranslationTextComponent) arg, response);
                 continue;
@@ -128,54 +129,54 @@ public class NodeInteropClient {
         }
     }
 
-    private String getTextContent(PlayerEntity player) {
-        List<String> content = new ArrayList<>();
+    private String getTextContent(final PlayerEntity player) {
+        final List<String> content = new ArrayList<>();
         content.add(String.format("%s %s", this.getTextContent(player.getDisplayName()), player.getUUID()));
 
         // held items
-        ItemStack mainHandStack = player.getItemBySlot(EquipmentSlotType.MAINHAND);
-        ItemStack offHandStack = player.getItemBySlot(EquipmentSlotType.OFFHAND);
+        final ItemStack mainHandStack = player.getItemBySlot(EquipmentSlotType.MAINHAND);
+        final ItemStack offHandStack = player.getItemBySlot(EquipmentSlotType.OFFHAND);
         content.add(this.getTextContent(mainHandStack));
         content.add(this.getTextContent(offHandStack));
 
         return String.join(newline, content);
     }
 
-    private String getTextContent(ITextComponent text) {
+    private String getTextContent(final ITextComponent text) {
         if (text instanceof TranslationTextComponent) {
             return ((TranslationTextComponent)text).getKey();
         }
-        String insertion = text.getStyle().getInsertion();
+        final String insertion = text.getStyle().getInsertion();
         if (insertion != null) {
             return insertion;
         }
-        StringBuilder content = new StringBuilder(text.getContents());
-        for (ITextComponent sibling : text.getSiblings()) {
+        final StringBuilder content = new StringBuilder(text.getContents());
+        for (final ITextComponent sibling : text.getSiblings()) {
             content.append(this.getTextContent(sibling));
         }
         return content.toString();
     }
 
     private String getTextContent(ItemStack stack) {
-        Item item = stack.getItem();
-        StringBuilder text = new StringBuilder();
+        final Item item = stack.getItem();
+        final StringBuilder text = new StringBuilder();
         text.append(item.getRegistryName());
 
-        CompoundNBT tag = stack.getTag();
+        final CompoundNBT tag = stack.getTag();
         if (tag == null) {
             return text.toString();
         }
-        CompoundNBT display = (CompoundNBT) stack.getTag().get("display");
+        final CompoundNBT display = (CompoundNBT) stack.getTag().get("display");
         if (display == null) {
             return text.toString();
         }
-        ListNBT name = (ListNBT) display.get("Name");
+        final ListNBT name = (ListNBT) display.get("Name");
         if (name == null) {
             return text.toString();
         }
 
         text.append('|');
-        for (INBT part : name) {
+        for (final INBT part : name) {
             if (part instanceof CompoundNBT) {
                 text.append(((CompoundNBT)part).getString("text"));
             } else {
@@ -185,8 +186,8 @@ public class NodeInteropClient {
         return text.toString();
     }
 
-    private String getTextContent(DamageSource damageSource) {
-        List<String> content = new ArrayList<>();
+    private String getTextContent(final DamageSource damageSource) {
+        final List<String> content = new ArrayList<>();
 
         content.add(damageSource.getMsgId());
 
@@ -202,8 +203,8 @@ public class NodeInteropClient {
         return String.join(newline, content);
     }
 
-    private String buildCommandResponse(NodeCommandSource source, Exception ex) {
-        List<String> response = this.buildCommandResponse(source, false);
+    private String buildCommandResponse(final NodeCommandSource source, final Exception ex) {
+        final List<String> response = this.buildCommandResponse(source, false);
 
         response.add(this.getErrorKey(ex));
         response.add(ex.getMessage());
@@ -211,20 +212,20 @@ public class NodeInteropClient {
         return String.join(newline, response);
     }
 
-    private List<String> buildCommandResponse(NodeCommandSource source, boolean success) {
+    private List<String> buildCommandResponse(final NodeCommandSource source, final boolean success) {
         return new ArrayList<>(Arrays.asList(source.getRequestId(), Boolean.toString(success)));
     }
 
-    private String getErrorKey(Exception ex) {
+    private String getErrorKey(final Exception ex) {
         if (ex instanceof CommandSyntaxException) {
-            CommandSyntaxException csEx = (CommandSyntaxException) ex;
+            final CommandSyntaxException csEx = (CommandSyntaxException) ex;
             if (csEx.getRawMessage() instanceof TranslationTextComponent) {
-                TranslationTextComponent text = (TranslationTextComponent) csEx.getRawMessage();
+                final TranslationTextComponent text = (TranslationTextComponent) csEx.getRawMessage();
                 return text.getKey();
             }
         }
         if (ex instanceof NodeInteropCommandException) {
-            NodeInteropCommandException nicEx = (NodeInteropCommandException) ex;
+            final NodeInteropCommandException nicEx = (NodeInteropCommandException) ex;
             return nicEx.getErrorTextKey();
         }
         LOGGER.warn("Unexpected exception type", ex);

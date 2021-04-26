@@ -15,8 +15,8 @@ import java.util.Collection;
 
 public class MinigameCommand {
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralArgumentBuilder<CommandSource> b = Commands.literal("minigame")
+    public static void register(final CommandDispatcher<CommandSource> dispatcher) {
+        final LiteralArgumentBuilder<CommandSource> b = Commands.literal("minigame")
             .requires((player) -> player.hasPermission(1));
 
         b.then(
@@ -34,7 +34,7 @@ public class MinigameCommand {
         dispatcher.register(b);
     }
 
-    public static int listGames(CommandContext<CommandSource> context) {
+    public static int listGames(final CommandContext<CommandSource> context) {
         final CommandSource source = context.getSource();
         final Collection<Minigame> games = MinigameManager.getGames();
         if (games.isEmpty()) {
@@ -66,8 +66,8 @@ public class MinigameCommand {
         source.sendSuccess(gameDescriptionText, true);
     }
 
-    public static int startGame(CommandContext<CommandSource> context, Minigame game) {
-        MinigameGameClientEvent event = new MinigameGameClientEvent.MinigameStartGameClientEvent(game);
+    public static int startGame(final CommandContext<CommandSource> context, final Minigame game) {
+        final MinigameGameClientEvent event = new MinigameGameClientEvent.MinigameStartGameClientEvent(game);
         MinecraftForge.EVENT_BUS.post(event);
         context.getSource().sendSuccess(event.getAction(), true);
         return Command.SINGLE_SUCCESS;

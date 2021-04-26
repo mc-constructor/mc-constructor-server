@@ -38,7 +38,7 @@ public class MinigameManagerCommand {
 
     public static void register(final CommandDispatcher<CommandSource> dispatcher) {
 //        final ScoreboardCommand
-        LiteralArgumentBuilder<CommandSource> register = Commands.literal("register")
+        final LiteralArgumentBuilder<CommandSource> register = Commands.literal("register")
             .then(Commands.argument("key", StringArgumentType.word())
                 .then(Commands.argument("title", ComponentArgument.textComponent())
 
@@ -54,7 +54,7 @@ public class MinigameManagerCommand {
 
         dispatcher.register(register);
 
-        LiteralArgumentBuilder<CommandSource> unregister =
+        final LiteralArgumentBuilder<CommandSource> unregister =
             Commands.literal("unregister")
                 .then(Commands.argument("minigame", MinigameArgument.minigameArgument())
                     .suggests(MinigameArgument.SUGGEST_MINIGAMES)
@@ -62,7 +62,7 @@ public class MinigameManagerCommand {
         dispatcher.register(unregister);
     }
 
-    private static int registerGame(final CommandContext<CommandSource> context, boolean hasDescription) {
+    private static int registerGame(final CommandContext<CommandSource> context, final boolean hasDescription) {
         final String key = StringArgumentType.getString(context, "key");
         final ITextComponent title = ComponentArgument.getComponent(context, "title");
         ITextComponent description = null;
@@ -80,9 +80,9 @@ public class MinigameManagerCommand {
         }
     }
 
-    private static int unregisterGame(CommandContext<CommandSource> context) throws CommandSyntaxException {
+    private static int unregisterGame(final CommandContext<CommandSource> context) throws CommandSyntaxException {
         final NodeInteropClient interopClient = ((NodeCommandSource) context.getSource()).getInteropClient();
-        Minigame game = MinigameArgument.getMinigame(context, "minigame");
+        final Minigame game = MinigameArgument.getMinigame(context, "minigame");
         MinigameManager.unregisterGame(interopClient, game);
 
         context.getSource().sendSuccess(new StringTextComponent(game.getKey()), false);

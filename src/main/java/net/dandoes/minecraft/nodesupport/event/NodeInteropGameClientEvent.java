@@ -1,4 +1,4 @@
-package net.dandoes.minecraft.nodesupport;
+package net.dandoes.minecraft.nodesupport.event;
 
 import net.minecraftforge.eventbus.api.Event;
 

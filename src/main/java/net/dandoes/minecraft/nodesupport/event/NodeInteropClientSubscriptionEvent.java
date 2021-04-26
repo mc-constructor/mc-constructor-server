@@ -1,5 +1,7 @@
-package net.dandoes.minecraft.nodesupport;
+package net.dandoes.minecraft.nodesupport.event;
 
+import net.dandoes.minecraft.nodesupport.NodeCommandSource;
+import net.dandoes.minecraft.nodesupport.NodeInteropClientSubscriptionAction;
 import net.minecraftforge.eventbus.api.Event;
 
 public class NodeInteropClientSubscriptionEvent extends NodeInteropClientCommandEvent {
@@ -7,10 +9,10 @@ public class NodeInteropClientSubscriptionEvent extends NodeInteropClientCommand
     private final NodeInteropClientSubscriptionAction action;
     private final String eventClassName;
 
-    protected NodeInteropClientSubscriptionEvent(
-            final NodeCommandSource source,
-            final NodeInteropClientSubscriptionAction action,
-            final String eventClassName
+    public NodeInteropClientSubscriptionEvent(
+        final NodeCommandSource source,
+        final NodeInteropClientSubscriptionAction action,
+        final String eventClassName
     ) {
         super(source);
         this.action = action;

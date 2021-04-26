@@ -42,19 +42,19 @@ public class NodeCommandSource extends CommandSource {
     }
 
     @Override
-    public void sendSuccess(ITextComponent message, boolean allowLogging) {
+    public void sendSuccess(final ITextComponent message, final boolean allowLogging) {
         LOGGER.info("sending success for requestId " + this.requestId);
         this.interopClient.sendResponse(this, message);
     }
 
     @Override
-    public void sendFailure(ITextComponent message) {
+    public void sendFailure(final ITextComponent message) {
         LOGGER.info("sending failure message for requestId " + this.requestId + ": " + message.getContents());
         final SimpleCommandExceptionType exceptionType = new SimpleCommandExceptionType(message);
         this.interopClient.sendResponse(this, exceptionType.create());
     }
 
-    public void sendErrorMessage(Exception ex) {
+    public void sendErrorMessage(final Exception ex) {
         LOGGER.info("sending error message for requestId " + this.requestId + ": " + ex.getLocalizedMessage());
         this.interopClient.sendResponse(this, ex);
     }

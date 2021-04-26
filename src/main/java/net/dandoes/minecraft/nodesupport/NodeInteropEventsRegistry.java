@@ -1,5 +1,7 @@
 package net.dandoes.minecraft.nodesupport;
 
+import net.dandoes.minecraft.nodesupport.event.NodeInteropClientSubscriptionCommandEvent;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropClientSubscriptionEvent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;

@@ -15,15 +15,15 @@ public class MinigameArgument implements ArgumentType<MinigameSelector> {
 
     // TODO: figure out why suggestions aren't making it to the client
     public static final SuggestionProvider<CommandSource> SUGGEST_MINIGAMES = (context, builder) -> {
-        StringReader stringreader = new StringReader(context.getInput());
+        final StringReader stringreader = new StringReader(context.getInput());
         stringreader.setCursor(builder.getStart());
-        for (Minigame game : MinigameManager.getGames()) {
+        for (final Minigame game : MinigameManager.getGames()) {
             builder.suggest(game.getKey(), game.getTitle());
         }
         return builder.buildFuture();
     };
 
-    public static Minigame getMinigame(CommandContext<CommandSource> context, String name) throws CommandSyntaxException {
+    public static Minigame getMinigame(final CommandContext<CommandSource> context, final String name) throws CommandSyntaxException {
         return context.getArgument(name, MinigameSelector.class).getGame(context.getSource());
     }
 
@@ -32,7 +32,7 @@ public class MinigameArgument implements ArgumentType<MinigameSelector> {
     }
 
     @Override
-    public MinigameSelector parse(StringReader reader) throws CommandSyntaxException {
+    public MinigameSelector parse(final StringReader reader) throws CommandSyntaxException {
         return new MinigameSelector(StringArgumentType.string().parse(reader));
     }
 

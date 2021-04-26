@@ -8,7 +8,7 @@ public class Minigame {
     private final ITextComponent title;
     private final ITextComponent description;
 
-    public Minigame(String key, ITextComponent title, ITextComponent description) {
+    public Minigame(final String key, final ITextComponent title, final ITextComponent description) {
         this.key = key;
         this.title = title;
         this.description = description;

@@ -17,7 +17,7 @@ public class Codslapper extends SwordItem {
     private static final Logger LOGGER = LogManager.getLogger(Codslapper.class);
     protected static final UUID ATTACK_KNOCKBACK_MODIFIER = UUID.fromString("AAF54B27-F135-4D56-908F-2D23111E649B");
 
-    public Codslapper(final String itemId, CodslapperItemTier tier) {
+    public Codslapper(final String itemId, final CodslapperItemTier tier) {
         super(tier, 0, -2.4F,
             new Item.Properties()
                 .tab(ItemGroup.TAB_COMBAT)
@@ -33,21 +33,21 @@ public class Codslapper extends SwordItem {
     }
 
     @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public boolean hurtEnemy(final ItemStack stack, final LivingEntity target, final LivingEntity attacker) {
         LOGGER.debug("hitEntity: " + attacker.getName().toString() + " attacking " + target.getName().toString());
         return super.hurtEnemy(stack, target, attacker);
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlotType equipmentSlot) {
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(final EquipmentSlotType equipmentSlot) {
         final Multimap<Attribute, AttributeModifier> baseModifiers = super.getDefaultAttributeModifiers(equipmentSlot);
         if (equipmentSlot != EquipmentSlotType.MAINHAND) {
             return baseModifiers;
         }
 
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+        final ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
         builder.putAll(baseModifiers);
-        AttributeModifier value = new AttributeModifier(
+        final AttributeModifier value = new AttributeModifier(
                 "Codslap knockback",
                 this.getTier().getKnockbackMultiplier(),
                 AttributeModifier.Operation.MULTIPLY_BASE

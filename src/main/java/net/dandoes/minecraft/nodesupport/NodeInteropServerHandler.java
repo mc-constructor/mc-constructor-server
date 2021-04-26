@@ -8,6 +8,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropClientSubscriptionCommandEvent;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropCommandEvent;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
@@ -48,19 +50,19 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf in = (ByteBuf) msg;
+    public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
+        final ByteBuf in = (ByteBuf) msg;
         try {
             this.bufferLock.lock();
             while (in.isReadable()) {
-                char c = (char) in.readByte();
+                final char c = (char) in.readByte();
                 if (!this.isReady && c == this.newline) {
                     this.delimiter = this.buffer.toString();
                     this.isReady = true;
                     this.buffer.delete(0, this.buffer.length());
                     LOGGER.debug("got delimiter: " + this.delimiter);
                     try {
-                        ChannelWriter writer = new ChannelWriter(this.channel, this.delimiter);
+                        final ChannelWriter writer = new ChannelWriter(this.channel, this.delimiter);
                         this.client = new NodeInteropClient(writer);
                         this.channel.writeAndFlush(Unpooled.copiedBuffer(this.delimiter, CharsetUtil.UTF_8)).sync();
                     } catch (Exception ex) {
@@ -86,18 +88,18 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void checkBuffer() throws Exception {
-        int endMessageIndex = this.buffer.indexOf(this.delimiter);
+        final int endMessageIndex = this.buffer.indexOf(this.delimiter);
         if (endMessageIndex < 0) {
             return;
         }
-        List<String> messages = this.getNextFromBuffer();
+        final List<String> messages = this.getNextFromBuffer();
         for (String message : messages) {
             this.handleMessage(message);
         }
     }
 
     private List<String> getNextFromBuffer() {
-        List<String> messages = new ArrayList<>();
+        final List<String> messages = new ArrayList<>();
         // multiple messages can come in a single "chunk" / reading session. it's expensive to get the lock, so get all
         // messages in the buffer at once
         try {
@@ -115,28 +117,27 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void handleMessage(String message) throws Exception {
-        String[] parts = message.split("\n");
+    private void handleMessage(final String message) throws Exception {
+        final String[] parts = message.split("\n");
         if (parts.length > 3) {
             throw new Exception("Unexpected message length");
         }
         LOGGER.debug("handleIncomingMessage: " + message);
-        String requestId = parts[0];
-        String type = parts[1];
-        String cmd = parts[2];
-        NodeCommandSource source = new NodeCommandSource(this.getServer(), this.client, requestId);
+        final String requestId = parts[0];
+        final String type = parts[1];
+        final String cmd = parts[2];
+        final NodeCommandSource source = new NodeCommandSource(this.getServer(), this.client, requestId);
         this.handleCommand(source, type, cmd);
     }
 
-    private void handleCommand(NodeCommandSource source, String type, String cmd) {
+    private void handleCommand(final NodeCommandSource source, final String type, final String cmd) {
         if (type.equals("cmd")) {
             this.getServer().handleConsoleInput(cmd, source);
             return;
         }
 
         if (type.equals("eventSubscription")) {
-            NodeInteropClientSubscriptionCommandEvent event = new NodeInteropClientSubscriptionCommandEvent(source, cmd);
-            MinecraftForge.EVENT_BUS.post(event);
+            this.onEventSubscriptionCommand(source, cmd);
             return;
         }
 
@@ -146,6 +147,11 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
         }
 
         LOGGER.warn("Unrecognized message type: {}", type);
+    }
+
+    private void onEventSubscriptionCommand(final NodeCommandSource source, final String cmd) {
+        NodeInteropClientSubscriptionCommandEvent event = new NodeInteropClientSubscriptionCommandEvent(source, cmd);
+        MinecraftForge.EVENT_BUS.post(event);
     }
 
     private void onInteropCommand(final NodeCommandSource source, final String type, final String cmd) {

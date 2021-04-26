@@ -1,7 +1,7 @@
 package net.dandoes.minecraft.minigame;
 
-import net.dandoes.minecraft.nodesupport.NodeInteropCommandEvent;
-import net.dandoes.minecraft.nodesupport.NodeInteropClientDisconnectEvent;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropCommandEvent;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropClientDisconnectEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class MinigameNodeInteropEventsRegistry {

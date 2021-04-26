@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import net.dandoes.minecraft.minigame.Minigame;
-import net.dandoes.minecraft.nodesupport.NodeInteropGameClientEvent;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropGameClientEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 

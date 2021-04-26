@@ -3,6 +3,7 @@ package net.dandoes.minecraft.minigame;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.dandoes.minecraft.nodesupport.*;
+import net.dandoes.minecraft.nodesupport.event.NodeInteropCommandEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.text.ITextComponent;
 
@@ -13,7 +14,7 @@ public class MinigameManager {
     private static final Map<String, Minigame> games = new HashMap<>();
     private static final Map<NodeInteropClient, Set<String>> interopClientGames = new HashMap<>();
 
-    public static void handleCommand(NodeInteropCommandEvent event) {
+    public static void handleCommand(final NodeInteropCommandEvent event) {
         final NodeCommandSource source = event.getSource();
         final CommandDispatcher<CommandSource> dispatcher = event.getServer().getCommands().getDispatcher();
         try {
@@ -23,8 +24,8 @@ public class MinigameManager {
         }
     }
 
-    public static Minigame registerGame(final NodeInteropClient interopClient, String key, ITextComponent title, ITextComponent description) throws MinigameRegistrationKeyConflictException {
-        Minigame game = new Minigame(key, title, description);
+    public static Minigame registerGame(final NodeInteropClient interopClient, String key, final ITextComponent title, final ITextComponent description) throws MinigameRegistrationKeyConflictException {
+        final Minigame game = new Minigame(key, title, description);
 
         if (games.containsKey(key)) {
             throw new MinigameRegistrationKeyConflictException();
@@ -38,7 +39,7 @@ public class MinigameManager {
         return game;
     }
 
-    public static void unregisterGame(final NodeInteropClient interopClient, Minigame game) {
+    public static void unregisterGame(final NodeInteropClient interopClient, final Minigame game) {
         games.remove(game.getKey());
         if (interopClientGames.containsKey(interopClient)) {
             interopClientGames.get(interopClient).remove(game.getKey());
@@ -64,7 +65,7 @@ public class MinigameManager {
         return games.keySet();
     }
 
-    public static void checkHasGame(String key) throws CommandSyntaxException {
+    public static void checkHasGame(final String key) throws CommandSyntaxException {
         if (!games.containsKey(key)) {
             throw MinigameArgument.NOT_FOUND.create();
         }

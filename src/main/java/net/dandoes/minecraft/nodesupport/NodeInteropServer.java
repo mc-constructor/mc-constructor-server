@@ -21,7 +21,7 @@ public class NodeInteropServer {
     private final NodeInteropChannelHandler handler;
     private final CompletableFuture<DedicatedServer> server;
 
-    public NodeInteropServer(int port) {
+    public NodeInteropServer(final int port) {
         this.handler = new NodeInteropChannelHandler(this);
         this.port = port;
         this.server = new CompletableFuture<>();
@@ -43,9 +43,9 @@ public class NodeInteropServer {
 
     public void run() {
         LOGGER.debug("starting...");
-        EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        ServerBootstrap b = new ServerBootstrap(); // (2)
+        final EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
+        final EventLoopGroup workerGroup = new NioEventLoopGroup();
+        final ServerBootstrap b = new ServerBootstrap(); // (2)
 
         b.group(bossGroup, workerGroup)
             .channel(NioServerSocketChannel.class) // (3)
@@ -54,7 +54,7 @@ public class NodeInteropServer {
             .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 
         // Bind and start to accept incoming connections.
-        ChannelFuture f = b.bind(port).syncUninterruptibly(); // (7)
+        final ChannelFuture f = b.bind(port).syncUninterruptibly(); // (7)
         LOGGER.info("listening on port " + port);
 
         // Wait until the server socket is closed.

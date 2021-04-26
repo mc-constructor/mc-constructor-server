@@ -25,26 +25,26 @@ public class CodslapModHandledEventsRegistry {
         if (!(attacker instanceof ServerPlayerEntity)) {
             return;
         }
-        ServerPlayerEntity player = (ServerPlayerEntity) attacker;
+        final ServerPlayerEntity player = (ServerPlayerEntity) attacker;
         // null check: first swing after join / spawn is null sometimes?
         if (player.swingingArm == null) {
             LOGGER.warn("Player.swingingHand was null, assuming main hand");
         } else if (player.swingingArm != Hand.MAIN_HAND) {
             return;
         }
-        ItemStack weaponStack = player.getMainHandItem();
-        Multimap<Attribute, AttributeModifier> modifiers = weaponStack.getAttributeModifiers(EquipmentSlotType.MAINHAND);
-        Collection<AttributeModifier> knockbackModifiers = modifiers.get(Attributes.ATTACK_KNOCKBACK);
+        final ItemStack weaponStack = player.getMainHandItem();
+        final Multimap<Attribute, AttributeModifier> modifiers = weaponStack.getAttributeModifiers(EquipmentSlotType.MAINHAND);
+        final Collection<AttributeModifier> knockbackModifiers = modifiers.get(Attributes.ATTACK_KNOCKBACK);
         if (knockbackModifiers != null) {
             LOGGER.info("Base knockback: " + event.getStrength());
-            float base = getBaseKnockback(knockbackModifiers, event.getStrength());
+            final float base = getBaseKnockback(knockbackModifiers, event.getStrength());
             event.setStrength(getKnockback(knockbackModifiers, base));
             LOGGER.info("Result knockback: " + event.getStrength());
         }
     }
 
-    private float getBaseKnockback(Collection<AttributeModifier> modifiers, float base) {
-        for (AttributeModifier modifier : modifiers) {
+    private float getBaseKnockback(final Collection<AttributeModifier> modifiers, float base) {
+        for (final AttributeModifier modifier : modifiers) {
             if (modifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE) {
                 base *= modifier.getAmount();
             }
@@ -52,7 +52,7 @@ public class CodslapModHandledEventsRegistry {
         return base;
     }
 
-    private float getKnockback(Collection<AttributeModifier> modifiers, float base) {
+    private float getKnockback(final Collection<AttributeModifier> modifiers, final float base) {
         float result = base;
         for (AttributeModifier modifier : modifiers) {
             if (modifier.getOperation() == AttributeModifier.Operation.ADDITION) {
