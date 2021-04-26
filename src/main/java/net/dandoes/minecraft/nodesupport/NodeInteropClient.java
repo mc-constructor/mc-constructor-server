@@ -88,8 +88,7 @@ public class NodeInteropClient {
             if (event instanceof LivingDeathEvent) {
                 LivingDeathEvent deathEvent = (LivingDeathEvent) event;
                 response.add(this.getTextContent(deathEvent.getSource()));
-                DamageSource deathSource = deathEvent.getSource();
-                Entity revengeTarget = deathSource.getDirectEntity();
+                final Entity revengeTarget = ((LivingDeathEvent) event).getEntityLiving().getLastHurtByMob();
                 if (revengeTarget instanceof PlayerEntity) {
                     response.add("player");
                     response.add(this.getTextContent((PlayerEntity)revengeTarget));
