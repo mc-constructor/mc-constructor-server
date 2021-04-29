@@ -13,23 +13,39 @@ import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collection;
 
+@FunctionalInterface
+interface MinigameEventFn {
+    MinigameGameClientEvent run(final Minigame minigame);
+}
+
 public class MinigameCommand {
+
+    private static LiteralArgumentBuilder<CommandSource> minigameGameCommand(
+        final String name,
+        final MinigameEventFn createEvent
+    ) {
+        return Commands.literal(name)
+                .then(Commands.argument("minigame", MinigameArgument.minigameArgument())
+                    .suggests(MinigameArgument.SUGGEST_MINIGAMES)
+                    .executes(context -> {
+                        final Minigame minigame = MinigameArgument.getMinigame(context, "minigame");
+                        final MinigameGameClientEvent event = createEvent.run(minigame);
+                        MinecraftForge.EVENT_BUS.post(event);
+                        context.getSource().sendSuccess(event.getAction(), true);
+                        return Command.SINGLE_SUCCESS;
+                    })
+                );
+    }
 
     public static void register(final CommandDispatcher<CommandSource> dispatcher) {
         final LiteralArgumentBuilder<CommandSource> b = Commands.literal("minigame")
             .requires((player) -> player.hasPermission(1));
 
-        b.then(
-            Commands.literal("start").then(
-                Commands.argument("minigame", MinigameArgument.minigameArgument())
-                    .suggests(MinigameArgument.SUGGEST_MINIGAMES)
-                    .executes(context -> startGame(context, MinigameArgument.getMinigame(context, "minigame")))
-            )
-        );
+        b.then(minigameGameCommand("start", MinigameGameClientEvent.MinigameStartGameClientEvent::new));
+        b.then(minigameGameCommand("stop", MinigameGameClientEvent.MinigameStopGameClientEvent::new));
+        b.then(minigameGameCommand("reset", MinigameGameClientEvent.MinigameResetGameClientEvent::new));
 
-        b.then(
-            Commands.literal("list").executes(MinigameCommand::listGames)
-        );
+        b.then(Commands.literal("list").executes(MinigameCommand::listGames));
 
         dispatcher.register(b);
     }
@@ -64,13 +80,6 @@ public class MinigameCommand {
                 "event.minigame.list.game.description",
                 description);
         source.sendSuccess(gameDescriptionText, true);
-    }
-
-    public static int startGame(final CommandContext<CommandSource> context, final Minigame game) {
-        final MinigameGameClientEvent event = new MinigameGameClientEvent.MinigameStartGameClientEvent(game);
-        MinecraftForge.EVENT_BUS.post(event);
-        context.getSource().sendSuccess(event.getAction(), true);
-        return Command.SINGLE_SUCCESS;
     }
 
 }

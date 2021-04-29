@@ -40,4 +40,16 @@ public class MinigameGameClientEvent extends NodeInteropGameClientEvent {
         }
     }
 
+    public static class MinigameStopGameClientEvent extends MinigameGameClientEvent {
+        public MinigameStopGameClientEvent(final Minigame game) {
+            super(game, "event.minigame.stop");
+        }
+    }
+
+    public static class MinigameResetGameClientEvent extends MinigameGameClientEvent {
+        public MinigameResetGameClientEvent(final Minigame game) {
+            super(game, "event.minigame.reset");
+        }
+    }
+
 }
