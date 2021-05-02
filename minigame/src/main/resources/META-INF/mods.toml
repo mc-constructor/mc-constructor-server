@@ -1,0 +1,36 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="GNU GPLv3"
+issueTrackerURL="https://github.com/mc-constructor/mc-constructor-server/issues"
+
+[[mods]]
+    modId="dandoes_minigame"
+    version="${file.jarVersion}"
+    displayName="Dandoes: Minigames"
+    # updateJSONURL="http://myurl.me/"
+     displayURL="https://github.com/mc-constructor/mc-constructor-server/issues"
+    # logoFile="nodesupportmod.png"
+    authors="Daniel Schaffer"
+    description='''
+    Makes it easier to write minigames using NodeJS
+    '''
+    [[dependencies.dandoes_minigame]]
+        modId="forge"
+        mandatory=true
+        versionRange="[36,)"
+        ordering="NONE"
+        side="BOTH"
+
+    [[dependencies.dandoes_minigame]]
+        modId="minecraft"
+        mandatory=true
+        versionRange="[1.16.5]"
+        ordering="NONE"
+        side="BOTH"
+
+    [[dependencies.dandoes_minigame]]
+        modId="dandoes_nodesupport"
+        mandatory=true
+        versionRange="[*]"
+        ordering="NONE"
+        side="SERVER"

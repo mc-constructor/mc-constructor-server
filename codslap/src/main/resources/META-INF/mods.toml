@@ -1,0 +1,36 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="GNU GPLv3"
+issueTrackerURL="https://github.com/mc-constructor/mc-constructor-server/issues"
+
+[[mods]]
+    modId="dandoes_minigame_codslap"
+    version="${file.jarVersion}"
+    displayName="Codslap!"
+    displayURL="https://github.com/mc-constructor/mc-constructor-server/issues"
+    # logoFile="nodesupportmod.png"
+    authors="Daniel Schaffer"
+    description='''
+    Slap your friends with cod!
+    '''
+
+    [[dependencies.dandoes_minigame_codslap]]
+        modId="forge"
+        mandatory=true
+        versionRange="[36,)" #mandatory
+        ordering="NONE"
+        side="BOTH"
+
+    [[dependencies.dandoes_minigame_codslap]]
+        modId="minecraft"
+        mandatory=true
+        versionRange="[1.16.5]"
+        ordering="NONE"
+        side="BOTH"
+
+    [[dependencies.dandoes_minigame_codslap]]
+    modId="dandoes_minigame"
+    mandatory=true
+    versionRange="[*]"
+    ordering="NONE"
+    side="BOTH"

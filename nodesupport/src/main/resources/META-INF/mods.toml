@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="GNU GPLv3"
+issueTrackerURL="https://github.com/mc-constructor/mc-constructor-server/issues"
+
+[[mods]]
+    modId="dandoes_nodesupport"
+    version="${file.jarVersion}"
+    displayName="DanDoes: Node Support"
+#     updateJSONURL="http://myurl.me/"
+     displayURL="https://github.com/mc-constructor/mc-constructor-server"
+    # logoFile="nodesupportmod.png"
+    authors="Daniel Schaffer"
+    description='''
+    Server for receiving commands from a NodeJS application
+    '''
+
+    [[dependencies.dandoes_nodesupport]]
+        modId="forge"
+        mandatory=true
+        versionRange="[36,)"
+        ordering="NONE"
+        side="BOTH"
+    [[dependencies.dandoes_nodesupport]]
+        modId="minecraft"
+        mandatory=true
+        versionRange="[1.16.5]"
+        ordering="NONE"
+        side="BOTH"

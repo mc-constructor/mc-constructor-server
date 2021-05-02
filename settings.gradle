@@ -1,0 +1,8 @@
+rootProject.name = 'mc-constructor'
+include ':nodesupport', ':minigame', ':codslap'
+
+rootProject.children.each { project ->
+    println("project: ${project}")
+    String fileBaseName = project.name.toLowerCase()
+    project.buildFileName = "${fileBaseName}.gradle"
+}
