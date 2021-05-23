@@ -193,17 +193,18 @@ String getBaseSemverString(Project proj) {
 }
 
 String getVersionString(Project proj) {
-    def (major, minor, patch, tag) = getSemver(proj)
+    def (major, minor, patch, prereleaseQualifier) = getSemver(proj)
 
-    String qualifier = System.getenv('VERSION_QUALIFIER') ?: tag ?: 'snapshot'
-    String buildId = qualifier == 'final' ? null : (
+    String buildQualifier = System.getenv('VERSION_QUALIFIER') ?: 'snapshot'
+    String qualifier = prereleaseQualifier ?: buildQualifier
+    String buildId = buildQualifier == 'final' && !prereleaseQualifier ? null : (
         System.getenv('BUILD_NUMBER') ?: new Date().format("yyyyMMddHHmmss")
     )
-    def result = "${major}.${minor}.${patch}"
+    def result = "${major}.${minor}.${patch}-${qualifier}"
     if (buildId) {
         result += ".${buildId}"
     }
-    return "${result}-${qualifier}"
+    return result
 }
 
 String getPrettyName(Project proj) {
