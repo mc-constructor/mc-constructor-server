@@ -31,6 +31,6 @@ issueTrackerURL="https://github.com/mc-constructor/mc-constructor-server/issues"
     [[dependencies.dandoes_minigame]]
         modId="dandoes_nodesupport"
         mandatory=true
-        versionRange="[*]"
+        versionRange="[0.1,)"
         ordering="NONE"
         side="SERVER"

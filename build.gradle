@@ -33,7 +33,7 @@ subprojects {
         sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
     }
     minecraft {
-        mappings channel: 'official', version: minecraft_version
+        mappings channel: 'official', version: minecraftVersion
 
         ModConfig projectMod = new ModConfig(project, project.moduleModId);
         projectMod.source(project.sourceSets.main)
@@ -83,12 +83,27 @@ subprojects {
 
     // Common dependencies for all modules
     dependencies {
-        minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+        minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
 
         testImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
         testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
         testCompile("org.junit.platform:junit-platform-launcher:1.1.0")
         testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
+    }
+
+    jar {
+        manifest {
+            attributes([
+                    "Specification-Title": project.moduleModName,
+                    "Specification-Vendor": "Daniel Schaffer",
+                    "Specification-Version": getBaseSemverString(rootProject),
+                    "Name": "${rootProject.name}/${project.name}",
+                    "Implementation-Title": project.moduleName,
+                    "Implementation-Version": getVersionString(rootProject),
+                    "Implementation-Vendor" :"Daniel Schaffer",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ])
+        }
     }
 }
 
@@ -166,39 +181,35 @@ task cleanRun {
     }
 }
 
+String[] getSemver(Project proj) {
+    def semver = proj.version =~ /^(\d+)\.(\d+)\.(\d+)(?:-(\w+))?$/
+    def (_, major, minor, patch, tag) = semver[0]
+    return [major, minor, patch, tag]
+}
+
+String getBaseSemverString(Project proj) {
+    def (major, minor, patch) = getSemver(proj)
+    return "${major}.${minor}.${patch}"
+}
+
 String getVersionString(Project proj) {
-    def build_server = System.getenv('CI') != null || System.getenv('BUILD_NUMBER') != null
+    def (major, minor, patch, tag) = getSemver(proj)
 
-    def version_patch_lc = proj.version_patch
-    if (System.getenv('BUILD_NUMBER') != null)
-        version_patch_lc = System.getenv('BUILD_NUMBER')
-
-    def version_classifier = ''
-    if (System.getenv('VERSION_CLS') != null)
-        version_classifier = System.getenv('VERSION_CLS')
-    else if (System.getenv('NIGHTLY') != null)
-        version_classifier = 'nightly'
-
-    def version_hash = ''
-    if (!build_server) {
-        try {
-            version_hash = "git rev-parse --short HEAD".execute().text.trim()
-        } catch (all) { }
+    String qualifier = System.getenv('VERSION_QUALIFIER') ?: tag ?: 'snapshot'
+    String buildId = qualifier == 'final' ? null : (
+        System.getenv('BUILD_NUMBER') ?: new Date().format("yyyyMMddHHmmss")
+    )
+    def result = "${major}.${minor}.${patch}"
+    if (buildId) {
+        result += ".${buildId}"
     }
-
-    def version_base = "${proj.version_major}.${proj.version_minor}.${version_patch_lc}"
-    def version_parts = ([ version_base, version_classifier, version_hash ]).findAll { p -> p != '' }
-
-    return String.join('-', version_parts)
+    return "${result}-${qualifier}"
 }
 
 String getPrettyName(Project proj) {
-    def project_base_name = rootProject.name
-    if (proj.hasProperty('module_name'))
-        project_base_name += "-${proj.module_name}"
-    return project_base_name
+    return "${rootProject.name}-${proj.moduleName}"
 }
 
 String getArchiveBaseName(Project proj) {
-    return getPrettyName(proj) + "-${project.minecraft_version}"
+    return "${getPrettyName(proj)}-${project.minecraftVersion}"
 }

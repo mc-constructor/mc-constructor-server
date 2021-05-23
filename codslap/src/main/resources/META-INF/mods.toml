@@ -31,6 +31,6 @@ issueTrackerURL="https://github.com/mc-constructor/mc-constructor-server/issues"
     [[dependencies.dandoes_minigame_codslap]]
     modId="dandoes_minigame"
     mandatory=true
-    versionRange="[*]"
+    versionRange="[0.1,)"
     ordering="NONE"
     side="BOTH"
