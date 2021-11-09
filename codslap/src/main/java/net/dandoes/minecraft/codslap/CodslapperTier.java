@@ -1,10 +1,10 @@
 package net.dandoes.minecraft.codslap;
 
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.LazyValue;
+import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 
-public enum CodslapperItemTier implements ICodslapperItemTier {
+public enum CodslapperTier implements KnockbackTier {
     WOOD_CODSLAPPER(1),
     STONE_CODSLAPPER(2),
     IRON_CODSLAPPER(3),
@@ -18,15 +18,15 @@ public enum CodslapperItemTier implements ICodslapperItemTier {
     private final float speed;
     private final float attackDamage;
     private final int enchantability;
-    private final LazyValue<Ingredient> repairMaterial;
+    private final LazyLoadedValue<Ingredient> repairMaterial;
     private final double knockbackMultiplier;
 
-    CodslapperItemTier(double knockbackMultiplier) {
+    CodslapperTier(double knockbackMultiplier) {
         this.uses = Integer.MAX_VALUE;
         this.speed = 0;
         this.attackDamage = 0F;
         this.enchantability = 0;
-        this.repairMaterial = new LazyValue<>(() -> Ingredient.of(Items.COD, Items.COD_BUCKET));
+        this.repairMaterial = new LazyLoadedValue<>(() -> Ingredient.of(Items.COD, Items.COD_BUCKET));
         this.knockbackMultiplier = knockbackMultiplier;
     }
 

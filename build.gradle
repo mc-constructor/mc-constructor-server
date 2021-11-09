@@ -3,15 +3,10 @@ import net.minecraftforge.gradle.common.util.ModConfig
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
-        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.3'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -20,6 +15,7 @@ apply plugin: 'idea'
 // Configure all projects
 subprojects {
     apply plugin: 'net.minecraftforge.gradle'
+    java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
     // Import mod dependencies and execute
 //    if (file('dependencies.gradle').exists())
@@ -29,9 +25,6 @@ subprojects {
     version = getVersionString(project)
     archivesBaseName = getArchiveBaseName(project)
 
-    compileJava {
-        sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
-    }
     minecraft {
         mappings channel: 'official', version: minecraftVersion
 
@@ -85,10 +78,10 @@ subprojects {
     dependencies {
         minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
 
-        testImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
-        testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
-        testCompile("org.junit.platform:junit-platform-launcher:1.1.0")
-        testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
+//        testImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
+//        testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+//        testCompile("org.junit.platform:junit-platform-launcher:1.1.0")
+//        testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
     }
 
     jar {

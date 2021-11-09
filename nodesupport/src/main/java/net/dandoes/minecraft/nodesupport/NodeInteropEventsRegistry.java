@@ -2,7 +2,7 @@ package net.dandoes.minecraft.nodesupport;
 
 import net.dandoes.minecraft.nodesupport.event.NodeInteropClientSubscriptionCommandEvent;
 import net.dandoes.minecraft.nodesupport.event.NodeInteropClientSubscriptionEvent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -22,7 +22,7 @@ public class NodeInteropEventsRegistry {
     @SubscribeEvent
     public void onClientSubscribeEvent(final NodeInteropClientSubscriptionEvent event) {
         final NodeInteropClient interopClient = event.getInteropClient();
-        final NodeCommandSource source = event.getSource();
+        final NodeCommandSourceStack source = event.getSource();
         try {
             final Class<? extends Event> eventClass = event.getEventClass();
             switch(event.getAction()) {
@@ -33,9 +33,9 @@ public class NodeInteropEventsRegistry {
                     interopClient.unsubscribeFromEvent(eventClass);
                     break;
             }
-            source.sendSuccess(new StringTextComponent("ok"), true);
+            source.sendSuccess(new TextComponent("ok"), true);
         } catch (ClassNotFoundException ex) {
-            interopClient.sendResponse(source, ex);
+            interopClient.sendResponse(source.getSource(), ex);
             ex.printStackTrace();
         }
     }

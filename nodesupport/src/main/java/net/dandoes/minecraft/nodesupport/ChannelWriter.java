@@ -3,6 +3,7 @@ package net.dandoes.minecraft.nodesupport;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.CharsetUtil;
+import net.dandoes.minecraft.nodesupport.serialization.MessageData;
 
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -14,14 +15,14 @@ public class ChannelWriter {
     private final SocketChannel channel;
     private final String delimiter;
     private final Lock channelWriteLock = new ReentrantLock();
-    private final Queue<String> queue = new ConcurrentLinkedQueue<>();
+    private final Queue<MessageData<?>> queue = new ConcurrentLinkedQueue<>();
 
     public ChannelWriter(final SocketChannel channel, final String delimiter) {
         this.delimiter = delimiter;
         this.channel = channel;
     }
 
-    public void writeMessage(final String message) {
+    public void writeMessage(final MessageData<?> message) {
         this.queue.add(message);
         CompletableFuture.runAsync(this::flush);
     }
@@ -37,12 +38,13 @@ public class ChannelWriter {
                 return;
             }
             while (this.queue.peek() != null) {
-                final String message = this.queue.poll();
+                final MessageData<?> message = this.queue.poll();
                 if (message == null) {
                     break;
                 }
 
-                this.channel.write(Unpooled.copiedBuffer(message + this.delimiter, CharsetUtil.UTF_8));
+                final String transmissionContent = message.toTransmissionContent(this.delimiter);
+                this.channel.write(Unpooled.copiedBuffer(transmissionContent, CharsetUtil.UTF_8));
             }
             this.channel.flush();
         } finally {

@@ -1,6 +1,6 @@
 package net.dandoes.minecraft.nodesupport.event;
 
-import net.dandoes.minecraft.nodesupport.NodeCommandSource;
+import net.dandoes.minecraft.nodesupport.NodeCommandSourceStack;
 import net.dandoes.minecraft.nodesupport.NodeInteropClient;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.eventbus.api.Event;
@@ -9,11 +9,11 @@ public class NodeInteropCommandEvent extends Event {
 
     private final DedicatedServer server;
     private final NodeInteropClient client;
-    private final NodeCommandSource source;
+    private final NodeCommandSourceStack source;
     private final String type;
     private final String cmd;
 
-    public NodeInteropCommandEvent(final DedicatedServer server, final NodeInteropClient client, final NodeCommandSource source, final String type, final String cmd) {
+    public NodeInteropCommandEvent(final DedicatedServer server, final NodeInteropClient client, final NodeCommandSourceStack source, final String type, final String cmd) {
         this.server = server;
         this.client = client;
         this.source = source;
@@ -29,7 +29,7 @@ public class NodeInteropCommandEvent extends Event {
         return client;
     }
 
-    public NodeCommandSource getSource() {
+    public NodeCommandSourceStack getSource() {
         return source;
     }
 

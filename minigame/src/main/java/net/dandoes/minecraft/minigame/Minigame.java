@@ -1,14 +1,14 @@
 package net.dandoes.minecraft.minigame;
 
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 
 public class Minigame {
 
     private final String key;
-    private final ITextComponent title;
-    private final ITextComponent description;
+    private final Component title;
+    private final Component description;
 
-    public Minigame(final String key, final ITextComponent title, final ITextComponent description) {
+    public Minigame(final String key, final Component title, final Component description) {
         this.key = key;
         this.title = title;
         this.description = description;
@@ -18,11 +18,11 @@ public class Minigame {
         return key;
     }
 
-    public ITextComponent getTitle() {
+    public Component getTitle() {
         return title;
     }
 
-    public ITextComponent getDescription() {
+    public Component getDescription() {
         return description;
     }
 

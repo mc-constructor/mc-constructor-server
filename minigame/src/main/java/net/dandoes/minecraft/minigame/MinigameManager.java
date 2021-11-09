@@ -2,11 +2,11 @@ package net.dandoes.minecraft.minigame;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.dandoes.minecraft.nodesupport.NodeCommandSource;
+import net.dandoes.minecraft.nodesupport.NodeCommandSourceStack;
 import net.dandoes.minecraft.nodesupport.NodeInteropClient;
 import net.dandoes.minecraft.nodesupport.event.NodeInteropCommandEvent;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 
 import java.util.*;
 
@@ -16,8 +16,8 @@ public class MinigameManager {
     private static final Map<NodeInteropClient, Set<String>> interopClientGames = new HashMap<>();
 
     public static void handleCommand(final NodeInteropCommandEvent event) {
-        final NodeCommandSource source = event.getSource();
-        final CommandDispatcher<CommandSource> dispatcher = event.getServer().getCommands().getDispatcher();
+        final NodeCommandSourceStack source = event.getSource();
+        final CommandDispatcher<CommandSourceStack> dispatcher = event.getServer().getCommands().getDispatcher();
         try {
             dispatcher.execute(event.getCmd(), source);
         } catch (CommandSyntaxException ex) {
@@ -25,7 +25,7 @@ public class MinigameManager {
         }
     }
 
-    public static Minigame registerGame(final NodeInteropClient interopClient, String key, final ITextComponent title, final ITextComponent description) throws MinigameRegistrationKeyConflictException {
+    public static Minigame registerGame(final NodeInteropClient interopClient, String key, final Component title, final Component description) throws MinigameRegistrationKeyConflictException {
         final Minigame game = new Minigame(key, title, description);
 
         if (games.containsKey(key)) {
@@ -68,7 +68,7 @@ public class MinigameManager {
 
     public static void checkHasGame(final String key) throws CommandSyntaxException {
         if (!games.containsKey(key)) {
-            throw MinigameArgument.NOT_FOUND.create();
+            throw MinigameArgumentType.NOT_FOUND.create();
         }
     }
 

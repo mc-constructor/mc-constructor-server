@@ -1,6 +1,6 @@
 package net.dandoes.minecraft.nodesupport.event;
 
-import net.dandoes.minecraft.nodesupport.NodeCommandSource;
+import net.dandoes.minecraft.nodesupport.NodeCommandSourceStack;
 import net.dandoes.minecraft.nodesupport.NodeInteropClientSubscriptionAction;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -10,7 +10,7 @@ public class NodeInteropClientSubscriptionEvent extends NodeInteropClientCommand
     private final String eventClassName;
 
     public NodeInteropClientSubscriptionEvent(
-        final NodeCommandSource source,
+        final NodeCommandSourceStack source,
         final NodeInteropClientSubscriptionAction action,
         final String eventClassName
     ) {

@@ -1,14 +1,14 @@
 package net.dandoes.minecraft.codslap;
 
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
@@ -22,18 +22,17 @@ public class CodslapModHandledEventsRegistry {
     @SubscribeEvent
     public void onKnockbackEvent(final LivingKnockBackEvent event) {
         final LivingEntity attacker = event.getEntityLiving().getLastHurtByMob();
-        if (!(attacker instanceof ServerPlayerEntity)) {
+        if (!(attacker instanceof final ServerPlayer player)) {
             return;
         }
-        final ServerPlayerEntity player = (ServerPlayerEntity) attacker;
         // null check: first swing after join / spawn is null sometimes?
         if (player.swingingArm == null) {
             LOGGER.warn("Player.swingingHand was null, assuming main hand");
-        } else if (player.swingingArm != Hand.MAIN_HAND) {
+        } else if (player.swingingArm != InteractionHand.MAIN_HAND) {
             return;
         }
         final ItemStack weaponStack = player.getMainHandItem();
-        final Multimap<Attribute, AttributeModifier> modifiers = weaponStack.getAttributeModifiers(EquipmentSlotType.MAINHAND);
+        final Multimap<Attribute, AttributeModifier> modifiers = weaponStack.getAttributeModifiers(EquipmentSlot.MAINHAND);
         final Collection<AttributeModifier> knockbackModifiers = modifiers.get(Attributes.ATTACK_KNOCKBACK);
         if (knockbackModifiers != null) {
             LOGGER.info("Base knockback: " + event.getStrength());

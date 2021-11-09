@@ -126,11 +126,11 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
         final String requestId = parts[0];
         final String type = parts[1];
         final String cmd = parts[2];
-        final NodeCommandSource source = new NodeCommandSource(this.getServer(), this.client, requestId);
+        final NodeCommandSourceStack source = new NodeCommandSourceStack(this.getServer(), this.client, requestId);
         this.handleCommand(source, type, cmd);
     }
 
-    private void handleCommand(final NodeCommandSource source, final String type, final String cmd) {
+    private void handleCommand(final NodeCommandSourceStack source, final String type, final String cmd) {
         if (type.equals("cmd")) {
             this.getServer().handleConsoleInput(cmd, source);
             return;
@@ -149,12 +149,12 @@ public class NodeInteropServerHandler extends ChannelInboundHandlerAdapter {
         LOGGER.warn("Unrecognized message type: {}", type);
     }
 
-    private void onEventSubscriptionCommand(final NodeCommandSource source, final String cmd) {
+    private void onEventSubscriptionCommand(final NodeCommandSourceStack source, final String cmd) {
         NodeInteropClientSubscriptionCommandEvent event = new NodeInteropClientSubscriptionCommandEvent(source, cmd);
         MinecraftForge.EVENT_BUS.post(event);
     }
 
-    private void onInteropCommand(final NodeCommandSource source, final String type, final String cmd) {
+    private void onInteropCommand(final NodeCommandSourceStack source, final String type, final String cmd) {
         NodeInteropCommandEvent event = new NodeInteropCommandEvent(this.getServer(), this.client, source, type, cmd);
         MinecraftForge.EVENT_BUS.post(event);
     }

@@ -1,34 +1,19 @@
 package net.dandoes.minecraft.nodesupport;
 
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NodeCommandSource extends CommandSource {
+import java.util.UUID;
+
+public class NodeCommandSource implements CommandSource {
     private static final Logger LOGGER = LogManager.getLogger(NodeCommandSource.class);
-    private static final int NODE_COMMAND_PERMISSION_LEVEL = 4;
 
     private final NodeInteropClient interopClient;
     private final String requestId;
 
-    public NodeCommandSource(final DedicatedServer server, final NodeInteropClient interopClient, final String requestId) {
-        super(
-            server,
-            Vector3d.ZERO,
-            Vector2f.ZERO,
-            server.overworld(),
-            NODE_COMMAND_PERMISSION_LEVEL,
-            "Server",
-            new StringTextComponent("Server"),
-            server,
-            null
-        );
+    public NodeCommandSource(final NodeInteropClient interopClient, final String requestId) {
         this.interopClient = interopClient;
         this.requestId = requestId;
     }
@@ -42,20 +27,33 @@ public class NodeCommandSource extends CommandSource {
     }
 
     @Override
-    public void sendSuccess(final ITextComponent message, final boolean allowLogging) {
+    public void sendMessage(Component msg, UUID p_80167_) {
         LOGGER.info("sending success for requestId " + this.requestId);
-        this.interopClient.sendResponse(this, message);
+        this.sendResponse(msg);
     }
 
     @Override
-    public void sendFailure(final ITextComponent message) {
-        LOGGER.info("sending failure message for requestId " + this.requestId + ": " + message.getContents());
-        final SimpleCommandExceptionType exceptionType = new SimpleCommandExceptionType(message);
-        this.interopClient.sendResponse(this, exceptionType.create());
+    public boolean acceptsSuccess() {
+        return true;
     }
 
-    public void sendErrorMessage(final Exception ex) {
-        LOGGER.info("sending error message for requestId " + this.requestId + ": " + ex.getLocalizedMessage());
+    @Override
+    public boolean acceptsFailure() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldInformAdmins() {
+        return true;
+    }
+
+    public void sendResponse(final Component msg) {
+        LOGGER.info("sending message for requestId " + this.getRequestId() + ": " + msg.getString());
+        this.interopClient.sendResponse(this, msg);
+    }
+
+    public void sendResponse(final Exception ex) {
+        LOGGER.info("sending exception message for requestId " + this.getRequestId() + ": " + ex.getLocalizedMessage());
         this.interopClient.sendResponse(this, ex);
     }
 }

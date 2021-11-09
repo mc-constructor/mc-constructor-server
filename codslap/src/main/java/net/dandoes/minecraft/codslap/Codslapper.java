@@ -2,12 +2,12 @@ package net.dandoes.minecraft.codslap;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.*;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,10 +17,10 @@ public class Codslapper extends SwordItem {
     private static final Logger LOGGER = LogManager.getLogger(Codslapper.class);
     protected static final UUID ATTACK_KNOCKBACK_MODIFIER = UUID.fromString("AAF54B27-F135-4D56-908F-2D23111E649B");
 
-    public Codslapper(final String itemId, final CodslapperItemTier tier) {
+    public Codslapper(final String itemId, final KnockbackTier tier) {
         super(tier, 0, -2.4F,
             new Item.Properties()
-                .tab(ItemGroup.TAB_COMBAT)
+                .tab(CreativeModeTab.TAB_COMBAT)
                 .stacksTo(1)
                 .rarity(Rarity.EPIC)
         );
@@ -28,8 +28,8 @@ public class Codslapper extends SwordItem {
 
     }
     @Override
-    public ICodslapperItemTier getTier() {
-        return (ICodslapperItemTier) super.getTier();
+    public CodslapperTier getTier() {
+        return (CodslapperTier) super.getTier();
     }
 
     @Override
@@ -39,9 +39,9 @@ public class Codslapper extends SwordItem {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(final EquipmentSlotType equipmentSlot) {
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(final EquipmentSlot equipmentSlot) {
         final Multimap<Attribute, AttributeModifier> baseModifiers = super.getDefaultAttributeModifiers(equipmentSlot);
-        if (equipmentSlot != EquipmentSlotType.MAINHAND) {
+        if (equipmentSlot != EquipmentSlot.MAINHAND) {
             return baseModifiers;
         }
 

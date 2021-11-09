@@ -1,12 +1,12 @@
 package net.dandoes.minecraft.nodesupport.event;
 
-import net.dandoes.minecraft.nodesupport.NodeCommandSource;
+import net.dandoes.minecraft.nodesupport.NodeCommandSourceStack;
 
 public class NodeInteropClientRawCommandEvent extends NodeInteropClientCommandEvent {
 
     private final String cmd;
 
-    public NodeInteropClientRawCommandEvent(final NodeCommandSource source, final String cmd) {
+    public NodeInteropClientRawCommandEvent(final NodeCommandSourceStack source, final String cmd) {
         super(source);
         this.cmd = cmd;
     }

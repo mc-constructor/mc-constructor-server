@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[36,)"
+loaderVersion="[37,)"
 license="GNU GPLv3"
 issueTrackerURL="https://github.com/mc-constructor/mc-constructor-server/issues"
 
@@ -17,14 +17,14 @@ issueTrackerURL="https://github.com/mc-constructor/mc-constructor-server/issues"
     [[dependencies.dandoes_minigame_codslap]]
         modId="forge"
         mandatory=true
-        versionRange="[36,)" #mandatory
+        versionRange="[37,)" #mandatory
         ordering="NONE"
         side="BOTH"
 
     [[dependencies.dandoes_minigame_codslap]]
         modId="minecraft"
         mandatory=true
-        versionRange="[1.16.5]"
+        versionRange="[1.17.1]"
         ordering="NONE"
         side="BOTH"
 

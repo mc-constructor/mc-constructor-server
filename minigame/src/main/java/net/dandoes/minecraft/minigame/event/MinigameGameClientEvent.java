@@ -1,54 +1,49 @@
 package net.dandoes.minecraft.minigame.event;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import net.dandoes.minecraft.minigame.Minigame;
+import net.dandoes.minecraft.minigame.serialization.MinigameGameClientEventData;
 import net.dandoes.minecraft.nodesupport.event.NodeInteropGameClientEvent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class MinigameGameClientEvent extends NodeInteropGameClientEvent {
 
     private final Minigame game;
-    private final ITextComponent action;
+    private final Component action;
 
     private MinigameGameClientEvent(final Minigame game, final String actionKey) {
         this.game = game;
-        this.action = new TranslationTextComponent("net.dandoes.minecraft.nodesupport.event.minigame.start", game);
+        this.action = new TranslatableComponent(actionKey, game.getTitle());
     }
 
     public Minigame getGame() {
         return game;
     }
 
-    public ITextComponent getAction() {
+    public Component getAction() {
         return action;
     }
 
     @Override()
-    public Collection<String> getInteropResponseContent() {
-        return Arrays.asList(
-            this.getAction().getString(),
-            this.getGame().getKey()
-        );
+    public MinigameGameClientEventData<?> getInteropEventData() {
+        return new MinigameGameClientEventData<>(this);
     }
 
     public static class MinigameStartGameClientEvent extends MinigameGameClientEvent {
         public MinigameStartGameClientEvent(final Minigame game) {
-            super(game, "net.dandoes.minecraft.nodesupport.event.minigame.start");
+            super(game, "net.dandoes.minecraft.minigame.event.minigame.start");
         }
     }
 
     public static class MinigameStopGameClientEvent extends MinigameGameClientEvent {
         public MinigameStopGameClientEvent(final Minigame game) {
-            super(game, "net.dandoes.minecraft.nodesupport.event.minigame.stop");
+            super(game, "net.dandoes.minecraft.minigame.event.minigame.stop");
         }
     }
 
     public static class MinigameResetGameClientEvent extends MinigameGameClientEvent {
         public MinigameResetGameClientEvent(final Minigame game) {
-            super(game, "net.dandoes.minecraft.nodesupport.event.minigame.reset");
+            super(game, "net.dandoes.minecraft.minigame.event.minigame.reset");
         }
     }
 

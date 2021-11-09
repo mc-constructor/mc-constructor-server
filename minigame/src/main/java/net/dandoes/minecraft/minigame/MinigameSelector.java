@@ -1,7 +1,7 @@
 package net.dandoes.minecraft.minigame;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 
 public class MinigameSelector {
 
@@ -11,10 +11,10 @@ public class MinigameSelector {
         this.key = key;
     }
 
-    public Minigame getGame(final CommandSource source) throws CommandSyntaxException {
+    public Minigame getGame(final CommandSourceStack source) throws CommandSyntaxException {
         final Minigame game = MinigameManager.getGame(this.key);
         if (game == null) {
-            throw MinigameArgument.NOT_FOUND.create();
+            throw MinigameArgumentType.NOT_FOUND.create();
         }
 
         return game;

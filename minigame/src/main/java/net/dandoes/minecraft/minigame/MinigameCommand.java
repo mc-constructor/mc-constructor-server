@@ -5,10 +5,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.dandoes.minecraft.minigame.event.MinigameGameClientEvent;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collection;
@@ -20,15 +20,15 @@ interface MinigameEventFn {
 
 public class MinigameCommand {
 
-    private static LiteralArgumentBuilder<CommandSource> minigameGameCommand(
+    private static LiteralArgumentBuilder<CommandSourceStack> minigameGameCommand(
         final String name,
         final MinigameEventFn createEvent
     ) {
         return Commands.literal(name)
-                .then(Commands.argument("minigame", MinigameArgument.minigameArgument())
-                    .suggests(MinigameArgument.SUGGEST_MINIGAMES)
+                .then(Commands.argument("minigame", MinigameArgumentType.minigameName())
+                    .suggests(MinigameArgumentType.SUGGEST_MINIGAME_NAMES)
                     .executes(context -> {
-                        final Minigame minigame = MinigameArgument.getMinigame(context, "minigame");
+                        final Minigame minigame = MinigameArgumentType.getMinigame(context, "minigame");
                         final MinigameGameClientEvent event = createEvent.run(minigame);
                         MinecraftForge.EVENT_BUS.post(event);
                         context.getSource().sendSuccess(event.getAction(), true);
@@ -37,8 +37,8 @@ public class MinigameCommand {
                 );
     }
 
-    public static void register(final CommandDispatcher<CommandSource> dispatcher) {
-        final LiteralArgumentBuilder<CommandSource> b = Commands.literal("minigame")
+    public static void register(final CommandDispatcher<CommandSourceStack> dispatcher) {
+        final LiteralArgumentBuilder<CommandSourceStack> b = Commands.literal("minigame")
             .requires((player) -> player.hasPermission(1));
 
         b.then(minigameGameCommand("start", MinigameGameClientEvent.MinigameStartGameClientEvent::new));
@@ -50,11 +50,11 @@ public class MinigameCommand {
         dispatcher.register(b);
     }
 
-    public static int listGames(final CommandContext<CommandSource> context) {
-        final CommandSource source = context.getSource();
+    public static int listGames(final CommandContext<CommandSourceStack> context) {
+        final CommandSourceStack source = context.getSource();
         final Collection<Minigame> games = MinigameManager.getGames();
         if (games.isEmpty()) {
-            source.sendSuccess(new TranslationTextComponent("net.dandoes.minecraft.nodesupport.event.minigame.list.empty"), true);
+            source.sendSuccess(new TranslatableComponent("net.dandoes.minecraft.minigame.event.minigame.list.empty"), true);
             return Command.SINGLE_SUCCESS;
         }
         for (final Minigame game : MinigameManager.getGames()) {
@@ -63,21 +63,21 @@ public class MinigameCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static void listGame(final CommandSource source, final Minigame game) {
-        final ITextComponent gameTitleText = new TranslationTextComponent(
-            "net.dandoes.minecraft.nodesupport.event.minigame.list.game.title",
+    private static void listGame(final CommandSourceStack source, final Minigame game) {
+        final Component gameTitleText = new TranslatableComponent(
+            "net.dandoes.minecraft.minigame.event.minigame.list.game.title",
             game.getTitle(),
             game.getKey()
         );
         source.sendSuccess(gameTitleText, true);
 
-        final ITextComponent description = game.getDescription();
+        final Component description = game.getDescription();
         if (description == null) {
             return;
         }
 
-        final ITextComponent gameDescriptionText = new TranslationTextComponent(
-                "net.dandoes.minecraft.nodesupport.event.minigame.list.game.description",
+        final Component gameDescriptionText = new TranslatableComponent(
+                "net.dandoes.minecraft.minigame.event.minigame.list.game.description",
                 description);
         source.sendSuccess(gameDescriptionText, true);
     }

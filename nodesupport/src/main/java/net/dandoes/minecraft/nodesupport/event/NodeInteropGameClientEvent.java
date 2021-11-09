@@ -1,11 +1,10 @@
 package net.dandoes.minecraft.nodesupport.event;
 
+import net.dandoes.minecraft.nodesupport.serialization.events.EventData;
 import net.minecraftforge.eventbus.api.Event;
-
-import java.util.Collection;
 
 public abstract class NodeInteropGameClientEvent extends Event {
 
-    public abstract Collection<String> getInteropResponseContent();
+    public abstract <TEvent extends NodeInteropGameClientEvent> EventData<TEvent> getInteropEventData();
 
 }

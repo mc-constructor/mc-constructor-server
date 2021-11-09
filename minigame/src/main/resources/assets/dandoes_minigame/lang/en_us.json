@@ -1,7 +1,7 @@
 {
-  "argument.dandoes_minigame.minigame.notfound": "A minigame with that name is not registered",
-  "event.minigame.list.empty": "No minigames have been registered yet. Start the minigame server.",
-  "event.minigame.list.game.title": "  §1§l%d§r §8(§4%d§r§8)§r",
-  "event.minigame.list.game.description": "    §7§o%d§r",
-  "event.minigame.start": "Starting minigame \"%d\"..."
+  "net.dandoes.minecraft.minigame.argument.minigame.notfound": "A minigame with that name is not registered",
+  "net.dandoes.minecraft.minigame.event.minigame.list.empty": "No minigames have been registered yet. Start the minigame server.",
+  "net.dandoes.minecraft.minigame.event.minigame.list.game.title": "  §1§l%d§r §8(§4%d§r§8)§r",
+  "net.dandoes.minecraft.minigame.event.minigame.list.game.description": "    §7§o%d§r",
+  "net.dandoes.minecraft.minigame.event.minigame.start": "Starting minigame \"%d\"..."
 }
